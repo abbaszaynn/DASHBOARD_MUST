@@ -1,0 +1,101 @@
+{
+  "entities": {
+    "FlaggedPost": {
+      "title": "Flagged Post",
+      "description": "Represents a piece of content that has been flagged for review.",
+      "type": "object",
+      "properties": {
+        "content": {
+          "type": "string",
+          "description": "The full text content of the post."
+        },
+        "userId": {
+          "type": "string",
+          "description": "The ID of the user who created the post."
+        },
+        "userName": {
+          "type": "string",
+          "description": "The name of the user who created the post."
+        },
+        "userAvatar": {
+            "type": "string",
+            "description": "URL to the user's avatar image."
+        },
+        "userUrl": {
+            "type": "string",
+            "description": "URL to the user's profile."
+        },
+        "date": {
+          "type": "string",
+          "format": "date-time",
+          "description": "The date and time the post was created."
+        },
+        "category": {
+          "type": "string",
+          "enum": ["Hate", "Offensive", "Neutral"],
+          "description": "The category assigned by the hate speech model."
+        },
+        "confidence": {
+          "type": "number",
+          "description": "The confidence score from the model (0-1)."
+        },
+        "source": {
+          "type": "string",
+          "description": "The platform where the content originated (e.g., 'Facebook')."
+        },
+        "region": {
+          "type": "string",
+          "description": "The geographical region associated with the post."
+        }
+      },
+      "required": ["content", "userId", "userName", "date", "category", "confidence", "source"]
+    },
+    "UserProfile": {
+      "title": "User Profile",
+      "description": "Stores information about a monitored user.",
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "The user's display name."
+        },
+        "avatarUrl": {
+          "type": "string",
+          "description": "URL to the user's avatar image."
+        },
+        "profileUrl": {
+          "type": "string",
+          "description": "URL to the user's social media profile."
+        },
+        "lastActivity": {
+          "type": "string",
+          "format": "date-time",
+          "description": "The timestamp of the user's last known activity."
+        },
+        "riskLevel": {
+          "type": "string",
+          "enum": ["Critical", "High", "Medium", "Low"],
+          "description": "The assessed risk level of the user."
+        }
+      },
+      "required": ["name", "profileUrl"]
+    }
+  },
+  "auth": {
+    "providers": []
+  },
+  "firestore": {
+    "/flagged_posts/{postId}": {
+      "schema": {
+        "$ref": "#/entities/FlaggedPost"
+      },
+      "description": "Stores individual posts that have been flagged by the system."
+    },
+    "/users/{userId}": {
+      "schema": {
+        "$ref": "#/entities/UserProfile"
+      },
+      "description": "Stores profiles of users who are being monitored."
+    }
+  }
+}

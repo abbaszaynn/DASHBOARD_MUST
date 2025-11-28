@@ -1,0 +1,174 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* Default to dark mode values for this specific theme */
+    --background: 222 47% 11%;
+    /* #0f172a - Slate 900 */
+    --foreground: 210 40% 98%;
+    /* Slate 50 */
+
+    --card: 217 33% 17%;
+    /* Slate 800 */
+    --card-foreground: 210 40% 98%;
+
+    --popover: 222 47% 11%;
+    --popover-foreground: 210 40% 98%;
+
+    --primary: 189 94% 43%;
+    /* Cyan 500 #06b6d4 */
+    --primary-foreground: 222 47% 11%;
+
+    --secondary: 217 33% 17%;
+    --secondary-foreground: 210 40% 98%;
+
+    --muted: 217 33% 17%;
+    --muted-foreground: 215 20% 65%;
+
+    --accent: 189 94% 43%;
+    --accent-foreground: 222 47% 11%;
+
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 217 33% 17%;
+    --input: 217 33% 17%;
+    --ring: 189 94% 43%;
+
+    --radius: 0.25rem;
+    /* Sharper corners for technical feel */
+
+    --chart-1: 189 94% 43%;
+    /* Cyan */
+    --chart-2: 217 91% 60%;
+    /* Blue */
+    --chart-3: 271 70% 50%;
+    /* Purple */
+    --chart-4: 45 93% 47%;
+    /* Amber */
+    --chart-5: 0 84% 60%;
+    /* Red */
+
+    --sidebar-background: 222 47% 11%;
+    --sidebar-foreground: 210 40% 98%;
+    --sidebar-primary: 189 94% 43%;
+    --sidebar-primary-foreground: 222 47% 11%;
+    --sidebar-accent: 217 33% 17%;
+    --sidebar-accent-foreground: 210 40% 98%;
+    --sidebar-border: 217 33% 17%;
+    --sidebar-ring: 189 94% 43%;
+  }
+
+  .dark {
+    --background: 222 47% 5%;
+    /* #020617 - Very dark blue/grey */
+    --foreground: 210 40% 98%;
+    /* #f8fafc */
+
+    --card: 222 47% 8%;
+    /* #0f172a - Slightly lighter than bg */
+    --card-foreground: 210 40% 98%;
+
+    --popover: 222 47% 5%;
+    --popover-foreground: 210 40% 98%;
+
+    --primary: 189 94% 43%;
+    /* #06b6d4 - Cyan-500 (Security/Tech feel) */
+    --primary-foreground: 222 47% 5%;
+
+    --secondary: 217 33% 17%;
+    /* #1e293b - Slate-800 */
+    --secondary-foreground: 210 40% 98%;
+
+    --muted: 217 33% 17%;
+    --muted-foreground: 215 20% 65%;
+
+    --accent: 189 94% 43%;
+    --accent-foreground: 222 47% 5%;
+
+    --destructive: 0 84% 60%;
+    /* #ef4444 - Red-500 */
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 217 33% 17%;
+    --input: 217 33% 17%;
+    --ring: 189 94% 43%;
+
+    --radius: 0.25rem;
+    /* Sharp corners for technical look */
+
+    /* Chart Colors - Neon/Cyberpunk palette */
+    --chart-1: 189 94% 43%;
+    /* Cyan */
+    --chart-2: 280 65% 60%;
+    /* Purple */
+    --chart-3: 330 80% 60%;
+    /* Pink */
+    --chart-4: 45 90% 60%;
+    /* Yellow/Amber */
+    --chart-5: 0 84% 60%;
+    /* Red */
+
+    --sidebar-background: 222 47% 4%;
+    --sidebar-foreground: 240 5% 96%;
+    --sidebar-primary: 189 94% 43%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 217 33% 17%;
+    --sidebar-accent-foreground: 240 5% 96%;
+    --sidebar-border: 217 33% 17%;
+    --sidebar-ring: 189 94% 43%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+    /* Subtle grid pattern for technical feel */
+    background-image: linear-gradient(to right, #1e293b 1px, transparent 1px),
+      linear-gradient(to bottom, #1e293b 1px, transparent 1px);
+    background-size: 40px 40px;
+    background-position: center center;
+    /* CRT Scanline Effect */
+    position: relative;
+    overflow-x: hidden;
+  }
+
+  body::after {
+    content: " ";
+    display: block;
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    right: 0;
+    background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.1) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.03), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.03));
+    z-index: 9999;
+    background-size: 100% 2px, 3px 100%;
+    pointer-events: none;
+  }
+}
+
+/* Custom Scrollbar for Webkit */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: hsl(var(--background));
+}
+
+::-webkit-scrollbar-thumb {
+  background: hsl(var(--muted));
+  border-radius: 0px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: hsl(var(--primary));
+}
