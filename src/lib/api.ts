@@ -1,4 +1,4 @@
-const API_BASE_URL = 'http://127.0.0.1:8000';
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
 
 export interface AnalysisResponse {
     error: boolean;
@@ -119,6 +119,16 @@ export const api = {
     getFlagged: async (): Promise<FlaggedResponse> => {
         try {
             const response = await fetch(`${API_BASE_URL}/flagged`);
+            return response.json();
+        } catch (error) {
+            console.error('API Error:', error);
+            throw error;
+        }
+    },
+
+    getLiveFeed: async (): Promise<FlaggedResponse> => {
+        try {
+            const response = await fetch(`${API_BASE_URL}/live-feed`);
             return response.json();
         } catch (error) {
             console.error('API Error:', error);

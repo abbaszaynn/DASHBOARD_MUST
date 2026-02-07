@@ -15,7 +15,7 @@ import {
   SidebarInset,
   SidebarFooter,
 } from "@/components/ui/sidebar";
-import { Logo } from "@/components/icons";
+
 import { Home, TrendingUp, Flag, Users, FileText, SettingsIcon, ShieldCheck, Activity, Lock } from "lucide-react";
 import { UserNav } from "@/components/user-nav";
 import { cn } from "@/lib/utils";
@@ -36,9 +36,8 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
       <Sidebar side="left" variant="sidebar" collapsible="icon" className="border-r border-border/40">
         <SidebarHeader className="border-b border-border/40 bg-sidebar/50 backdrop-blur">
           <div className="flex items-center gap-3 p-3">
-            <div className="relative flex h-8 w-8 items-center justify-center rounded-sm bg-primary/10">
-              <Logo className="h-5 w-5 text-primary animate-pulse" />
-              <div className="absolute inset-0 rounded-sm ring-1 ring-inset ring-primary/20" />
+            <div className="relative flex h-10 w-10 items-center justify-center overflow-hidden rounded-sm">
+              <img src="/logo.png" alt="MUST Security Logo" className="h-full w-full object-cover" />
             </div>
             <div className="flex flex-col gap-0.5 leading-none">
               <span className="font-bold tracking-wider text-foreground">MUST</span>

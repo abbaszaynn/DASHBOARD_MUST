@@ -90,6 +90,7 @@ export default function AiAnalyzer() {
                       placeholder="Enter text in English, Urdu, or Roman Urdu..."
                       className="resize-none bg-muted/30"
                       rows={3}
+                      suppressHydrationWarning
                       {...field}
                     />
                   </FormControl>

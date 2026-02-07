@@ -13,6 +13,7 @@ import TimeAgo from "@/components/time-ago";
 import { DashboardCard } from "@/components/dashboard-card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { api, TrendStats, MonitoringUser, FlaggedItem } from "@/lib/api";
+import { LiveFeed } from "@/components/dashboard/live-feed";
 
 const chartConfigWeekly = {
   Hate: { label: "Hate", color: "hsl(var(--chart-5))" },
@@ -195,61 +196,7 @@ export default function DashboardPage() {
         <div className="space-y-6">
           <AiAnalyzer />
 
-          <DashboardCard title="Live Feed" icon={Radio} className="h-[500px] flex flex-col" noPadding>
-            <div className="p-4 border-b border-border/50 bg-muted/20">
-              <div className="flex items-center justify-between">
-                <span className="text-xs font-mono text-muted-foreground uppercase">Real-time Interception</span>
-                <div className="flex items-center gap-1.5">
-                  <span className="relative flex h-2 w-2">
-                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
-                    <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span>
-                  </span>
-                  <span className="text-[10px] font-bold text-red-500">LIVE</span>
-                </div>
-              </div>
-            </div>
-            <ScrollArea className="flex-1">
-              <div className="divide-y divide-border/30">
-                {loading ? (
-                  Array.from({ length: 5 }).map((_, i) => (
-                    <div key={i} className="p-4 space-y-2">
-                      <div className="flex justify-between">
-                        <Skeleton className="h-4 w-20" />
-                        <Skeleton className="h-4 w-12" />
-                      </div>
-                      <Skeleton className="h-3 w-full" />
-                    </div>
-                  ))
-                ) : flaggedPosts && flaggedPosts.length > 0 ? (
-                  flaggedPosts.map((post: FlaggedItem) => (
-                    <div key={post.id} className="p-4 hover:bg-muted/30 transition-colors group">
-                      <div className="flex items-center justify-between mb-1">
-                        <span className="text-xs font-bold text-primary font-mono">User #{post.id}</span>
-                        <span className="text-[10px] text-muted-foreground font-mono"><TimeAgo date={post.timestamp} /></span>
-                      </div>
-                      <p className="text-xs text-muted-foreground line-clamp-2 mb-2 group-hover:text-foreground transition-colors">
-                        {post.text}
-                      </p>
-                      <div className="flex items-center justify-between">
-                        <Badge variant="outline" className={`text-[10px] h-5 px-1.5 rounded-sm border-0 ${post.category === "hate" ? "bg-destructive/10 text-destructive" :
-                          post.category === "offensive" ? "bg-amber-500/10 text-amber-500" : "bg-secondary text-secondary-foreground"
-                          }`}>
-                          {post.category.toUpperCase()}
-                        </Badge>
-                        <span className="text-[10px] font-mono text-muted-foreground">
-                          CONF: <span className={post.confidence > 80 ? "text-destructive" : "text-amber-500"}>{(post.confidence).toFixed(0)}%</span>
-                        </span>
-                      </div>
-                    </div>
-                  ))
-                ) : (
-                  <div className="p-8 text-center text-xs text-muted-foreground">
-                    No active threats detected in current window.
-                  </div>
-                )}
-              </div>
-            </ScrollArea>
-          </DashboardCard>
+          <LiveFeed />
         </div>
       </div>
     </div>
