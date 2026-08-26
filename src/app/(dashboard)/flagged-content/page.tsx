@@ -141,6 +141,14 @@ export default function FlaggedContentPage() {
           </Popover>
         </div>
       </PageHeader>
+      <p className="text-xs text-muted-foreground -mt-4 mb-4">
+        This view reads from the legacy demo dataset. For cases from the live multi-agent
+        pipeline (with legal citations and human-gated decisions), see{" "}
+        <a href="/review-queue" className="text-primary underline underline-offset-2">
+          Review Queue
+        </a>
+        .
+      </p>
       <div className="border rounded-lg">
         <Table>
           <TableHeader>

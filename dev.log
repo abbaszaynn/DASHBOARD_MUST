@@ -1,0 +1,40 @@
+
+> nextn@0.1.0 dev
+> next dev --turbopack -p 9002
+
+   ▲ Next.js 15.5.12 (Turbopack)
+   - Local:        http://localhost:9002
+   - Network:      http://172.23.161.88:9002
+   - Environments: .env
+
+ ✓ Starting...
+ ✓ Ready in 14.8s
+ ○ Compiling / ...
+[baseline-browser-mapping] The data in this module is over two months old.  To ensure accurate Baseline data, please update: `npm i baseline-browser-mapping@latest -D`
+Browserslist: browsers data (caniuse-lite) is 9 months old. Please run:
+  npx update-browserslist-db@latest
+  Why you should do it regularly: https://github.com/browserslist/update-db#readme
+ ✓ Compiled / in 70.7s
+ GET / 200 in 16071ms
+ GET / 200 in 2254ms
+ ○ Compiling /trend-analysis ...
+Failed to proxy http://127.0.0.1:8000/process [Error: socket hang up] { code: 'ECONNRESET' }
+[Error: socket hang up] { code: 'ECONNRESET' }
+Failed to proxy http://127.0.0.1:8000/live-feed [Error: socket hang up] { code: 'ECONNRESET' }
+[Error: socket hang up] { code: 'ECONNRESET' }
+Failed to proxy http://127.0.0.1:8000/live-feed [Error: socket hang up] { code: 'ECONNRESET' }
+[Error: socket hang up] { code: 'ECONNRESET' }
+ GET /trend-analysis 200 in 125249ms
+ GET /trend-analysis 200 in 99011ms
+ GET /trend-analysis 200 in 148453ms
+ GET /flagged-content 200 in 49626ms
+ ✓ Compiled /trend-analysis in 158.2s
+ ○ Compiling /review-queue ...
+ ✓ Compiled /review-queue in 2.5s
+ GET /review-queue 200 in 3009ms
+ ○ Compiling /legal-framework ...
+ ✓ Compiled /legal-framework in 2.6s
+ GET /legal-framework 200 in 3489ms
+ ○ Compiling /reports ...
+ ✓ Compiled /reports in 3s
+ GET /reports 200 in 3590ms

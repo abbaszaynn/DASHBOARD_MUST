@@ -16,7 +16,7 @@ import {
   SidebarFooter,
 } from "@/components/ui/sidebar";
 
-import { Home, TrendingUp, Flag, Users, FileText, SettingsIcon, ShieldCheck, Activity, Lock } from "lucide-react";
+import { Home, TrendingUp, Flag, Users, FileText, SettingsIcon, ShieldCheck, Activity, Lock, Gavel, Scale } from "lucide-react";
 import { UserNav } from "@/components/user-nav";
 import { cn } from "@/lib/utils";
 
@@ -24,7 +24,9 @@ const navItems = [
   { href: "/", icon: Home, label: "Command Center" },
   { href: "/trend-analysis", icon: TrendingUp, label: "Trend Analysis" },
   { href: "/flagged-content", icon: Flag, label: "Flagged Content" },
+  { href: "/review-queue", icon: Gavel, label: "Review Queue" },
   { href: "/user-monitoring", icon: Users, label: "User Monitoring" },
+  { href: "/legal-framework", icon: Scale, label: "Legal Framework" },
   { href: "/reports", icon: FileText, label: "Reports" },
 ];
 
@@ -81,6 +83,12 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
               <span>SECURE CONN.</span>
             </div>
           </div>
+          <Link
+            href="/privacy"
+            className="block text-center text-[10px] text-muted-foreground hover:text-primary transition-colors font-mono uppercase tracking-wider mt-1"
+          >
+            Privacy & Data Policy
+          </Link>
         </SidebarFooter>
       </Sidebar>
       <SidebarInset className="bg-background/50">

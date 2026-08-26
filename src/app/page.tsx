@@ -8,11 +8,11 @@ import { Skeleton } from "@/components/ui/skeleton";
 import AiAnalyzer from "@/components/dashboard/ai-analyzer";
 import { Bar, BarChart, CartesianGrid, Line, LineChart, Tooltip, XAxis, YAxis, LabelList, Cell, Area, AreaChart } from "recharts";
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
-import { weeklyTrends, platformSources } from "@/lib/data";
+import { weeklyTrends } from "@/lib/data";
 import TimeAgo from "@/components/time-ago";
 import { DashboardCard } from "@/components/dashboard-card";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { api, TrendStats, MonitoringUser, FlaggedItem } from "@/lib/api";
+import { api, TrendStats, MonitoringUser, FlaggedItem, PlatformStat } from "@/lib/api";
 import { LiveFeed } from "@/components/dashboard/live-feed";
 
 const chartConfigWeekly = {
@@ -38,20 +38,23 @@ export default function DashboardPage() {
   const [stats, setStats] = useState<TrendStats | null>(null);
   const [monitoringUsers, setMonitoringUsers] = useState<MonitoringUser[]>([]);
   const [flaggedPosts, setFlaggedPosts] = useState<FlaggedItem[]>([]);
+  const [platformStats, setPlatformStats] = useState<PlatformStat[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [trendsData, monitoringData, flaggedData] = await Promise.all([
+        const [trendsData, monitoringData, flaggedData, platformStatsData] = await Promise.all([
           api.getTrends(),
           api.getMonitoring(),
-          api.getFlagged()
+          api.getFlagged(),
+          api.getPlatformStats(),
         ]);
 
         if (!trendsData.error) setStats(trendsData.stats);
         if (!monitoringData.error) setMonitoringUsers(monitoringData.data);
         if (!flaggedData.error) setFlaggedPosts(flaggedData.data);
+        if (!platformStatsData.error) setPlatformStats(platformStatsData.data);
       } catch (error) {
         console.error("Failed to fetch dashboard data:", error);
       } finally {
@@ -61,6 +64,8 @@ export default function DashboardPage() {
 
     fetchData();
   }, []);
+
+  const platformDistribution = platformStats.map((p) => ({ name: p.platform, value: p.hate + p.offensive }));
 
   const totalPostsAnalyzed = stats?.total || 0;
   const totalFlaggedCount = (stats?.hate || 0) + (stats?.offensive || 0);
@@ -155,24 +160,32 @@ export default function DashboardPage() {
 
           <div className="grid md:grid-cols-2 gap-6">
             <DashboardCard title="Platform Distribution" icon={BarChart3}>
-              <ChartContainer config={chartConfigPlatform} className="h-[200px] w-full">
-                <BarChart data={platformSources} layout="vertical" margin={{ left: 0, right: 0 }}>
-                  <YAxis dataKey="name" type="category" tickLine={false} axisLine={false} width={70} tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 11 }} />
-                  <XAxis type="number" hide />
-                  <Tooltip cursor={{ fill: 'hsl(var(--muted)/0.2)' }} content={<ChartTooltipContent hideLabel />} />
-                  <Bar dataKey="value" radius={2} barSize={20}>
-                    {platformSources.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={[
-                        'hsl(var(--chart-1))',
-                        'hsl(var(--chart-2))',
-                        'hsl(var(--chart-3))',
-                        'hsl(var(--chart-4))'
-                      ][index % 4]} />
-                    ))}
-                    <LabelList dataKey="value" position="right" offset={8} className="fill-foreground font-mono" fontSize={10} />
-                  </Bar>
-                </BarChart>
-              </ChartContainer>
+              {loading ? (
+                <Skeleton className="h-[200px] w-full" />
+              ) : platformDistribution.length > 0 ? (
+                <ChartContainer config={chartConfigPlatform} className="h-[200px] w-full">
+                  <BarChart data={platformDistribution} layout="vertical" margin={{ left: 0, right: 0 }}>
+                    <YAxis dataKey="name" type="category" tickLine={false} axisLine={false} width={70} tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 11 }} />
+                    <XAxis type="number" hide />
+                    <Tooltip cursor={{ fill: 'hsl(var(--muted)/0.2)' }} content={<ChartTooltipContent hideLabel />} />
+                    <Bar dataKey="value" radius={2} barSize={20}>
+                      {platformDistribution.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={[
+                          'hsl(var(--chart-1))',
+                          'hsl(var(--chart-2))',
+                          'hsl(var(--chart-3))',
+                          'hsl(var(--chart-4))'
+                        ][index % 4]} />
+                      ))}
+                      <LabelList dataKey="value" position="right" offset={8} className="fill-foreground font-mono" fontSize={10} />
+                    </Bar>
+                  </BarChart>
+                </ChartContainer>
+              ) : (
+                <div className="h-[200px] flex items-center justify-center text-xs text-muted-foreground italic">
+                  No flagged content processed yet.
+                </div>
+              )}
             </DashboardCard>
 
             <DashboardCard title="Category Breakdown" icon={AlertTriangle}>

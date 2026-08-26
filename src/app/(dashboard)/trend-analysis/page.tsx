@@ -1,14 +1,14 @@
 "use client"
 
-import { weeklyTrends, regionalBreakdown, platformSources, hotKeywords, flaggedPosts, users } from "@/lib/data";
+import { weeklyTrends, hotKeywords, flaggedPosts, users } from "@/lib/data";
 import { Bar, BarChart, CartesianGrid, Line, LineChart, Tooltip, XAxis, YAxis, LabelList, Cell, Area, AreaChart } from "recharts";
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
 import { suggestKeywordsHashtags, SuggestKeywordsHashtagsOutput } from "@/ai/flows/suggest-keywords-hashtags";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Bot, Loader2, Flame, Map, TrendingUp, Globe, Share2, ArrowRight } from "lucide-react";
+import { Bot, Loader2, Flame, Map, TrendingUp, Globe, Share2, ArrowRight, Scale, Users as UsersIcon } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import KeywordUsersDialog from "./components/keyword-users-dialog";
 import type { User, FlaggedPost } from "@/types";
@@ -46,7 +46,9 @@ type UserWithPosts = {
     posts: Pick<FlaggedPost, 'id' | 'content'>[];
 };
 
-import { api } from "@/lib/api";
+import { api, ProcessResponse, DistrictStat, PlatformStat } from "@/lib/api";
+
+type ChartDatum = { name: string; value: number };
 
 export default function TrendAnalysisPage() {
     const [currentTrends, setCurrentTrends] = useState("");
@@ -60,14 +62,38 @@ export default function TrendAnalysisPage() {
 
     // Content Classifier State
     const [analysisText, setAnalysisText] = useState("");
-    const [analysisResult, setAnalysisResult] = useState<any>(null);
+    const [analysisResult, setAnalysisResult] = useState<ProcessResponse | null>(null);
     const [isAnalyzing, setIsAnalyzing] = useState(false);
+
+    // Live district/platform stats (replaces hardcoded mock arrays)
+    const [districtData, setDistrictData] = useState<ChartDatum[]>([]);
+    const [platformData, setPlatformData] = useState<ChartDatum[]>([]);
+    const [statsLoading, setStatsLoading] = useState(true);
+    const [districtsAllUnknown, setDistrictsAllUnknown] = useState(false);
+
+    useEffect(() => {
+        (async () => {
+            const [districtRes, platformRes] = await Promise.all([
+                api.getDistrictStats(),
+                api.getPlatformStats(),
+            ]);
+            if (!districtRes.error) {
+                const rows = districtRes.data;
+                setDistrictsAllUnknown(rows.length > 0 && rows.every((r) => r.district === "Unknown"));
+                setDistrictData(rows.map((r: DistrictStat) => ({ name: r.district, value: r.hate + r.offensive })));
+            }
+            if (!platformRes.error) {
+                setPlatformData(platformRes.data.map((r: PlatformStat) => ({ name: r.platform, value: r.hate + r.offensive })));
+            }
+            setStatsLoading(false);
+        })();
+    }, []);
 
     const handleAnalyze = async () => {
         if (!analysisText) return;
         setIsAnalyzing(true);
         try {
-            const result = await api.analyze(analysisText);
+            const result = await api.process(analysisText);
             setAnalysisResult(result);
         } catch (error) {
             console.error("Analysis failed:", error);
@@ -159,32 +185,55 @@ export default function TrendAnalysisPage() {
 
                     <div className="grid md:grid-cols-2 gap-6">
                         <DashboardCard title="Regional Breakdown" icon={Map}>
-                            <ChartContainer config={chartConfigRegional} className="h-[250px] w-full">
-                                <BarChart data={regionalBreakdown} layout="vertical" margin={{ left: 0, right: 20 }}>
-                                    <YAxis dataKey="name" type="category" tickLine={false} axisLine={false} tickMargin={8} width={80} tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 11 }} />
-                                    <XAxis type="number" hide />
-                                    <Tooltip cursor={{ fill: 'hsl(var(--muted)/0.2)' }} content={<ChartTooltipContent hideLabel />} />
-                                    <Bar dataKey="value" fill="hsl(var(--chart-1))" radius={2} barSize={24}>
-                                        <LabelList dataKey="value" position="right" offset={8} className="fill-foreground font-mono" fontSize={10} />
-                                    </Bar>
-                                </BarChart>
-                            </ChartContainer>
+                            {statsLoading ? (
+                                <Skeleton className="h-[250px] w-full" />
+                            ) : districtData.length > 0 ? (
+                                <>
+                                    <ChartContainer config={chartConfigRegional} className="h-[250px] w-full">
+                                        <BarChart data={districtData} layout="vertical" margin={{ left: 0, right: 20 }}>
+                                            <YAxis dataKey="name" type="category" tickLine={false} axisLine={false} tickMargin={8} width={80} tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 11 }} />
+                                            <XAxis type="number" hide />
+                                            <Tooltip cursor={{ fill: 'hsl(var(--muted)/0.2)' }} content={<ChartTooltipContent hideLabel />} />
+                                            <Bar dataKey="value" fill="hsl(var(--chart-1))" radius={2} barSize={24}>
+                                                <LabelList dataKey="value" position="right" offset={8} className="fill-foreground font-mono" fontSize={10} />
+                                            </Bar>
+                                        </BarChart>
+                                    </ChartContainer>
+                                    {districtsAllUnknown && (
+                                        <p className="text-[10px] text-muted-foreground mt-2 italic">
+                                            District tagging isn't available for ingested content yet — all flagged items are grouped as "Unknown" until source data includes location metadata.
+                                        </p>
+                                    )}
+                                </>
+                            ) : (
+                                <div className="h-[250px] flex items-center justify-center text-xs text-muted-foreground italic">
+                                    No flagged content processed yet.
+                                </div>
+                            )}
                         </DashboardCard>
 
                         <DashboardCard title="Platform Sources" icon={Share2}>
-                            <ChartContainer config={chartConfigPlatform} className="h-[250px] w-full">
-                                <BarChart data={platformSources} margin={{ top: 20 }}>
-                                    <XAxis dataKey="name" tickLine={false} axisLine={false} tickMargin={8} tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 11 }} />
-                                    <YAxis hide />
-                                    <Tooltip cursor={{ fill: 'hsl(var(--muted)/0.2)' }} content={<ChartTooltipContent />} />
-                                    <Bar dataKey="value" radius={4}>
-                                        {platformSources.map((entry, index) => (
-                                            <Cell key={`cell-${index}`} fill={chartColors[index % chartColors.length]} />
-                                        ))}
-                                        <LabelList dataKey="value" position="top" offset={8} className="fill-foreground font-mono" fontSize={10} />
-                                    </Bar>
-                                </BarChart>
-                            </ChartContainer>
+                            {statsLoading ? (
+                                <Skeleton className="h-[250px] w-full" />
+                            ) : platformData.length > 0 ? (
+                                <ChartContainer config={chartConfigPlatform} className="h-[250px] w-full">
+                                    <BarChart data={platformData} margin={{ top: 20 }}>
+                                        <XAxis dataKey="name" tickLine={false} axisLine={false} tickMargin={8} tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 11 }} />
+                                        <YAxis hide />
+                                        <Tooltip cursor={{ fill: 'hsl(var(--muted)/0.2)' }} content={<ChartTooltipContent />} />
+                                        <Bar dataKey="value" radius={4}>
+                                            {platformData.map((entry, index) => (
+                                                <Cell key={`cell-${index}`} fill={chartColors[index % chartColors.length]} />
+                                            ))}
+                                            <LabelList dataKey="value" position="top" offset={8} className="fill-foreground font-mono" fontSize={10} />
+                                        </Bar>
+                                    </BarChart>
+                                </ChartContainer>
+                            ) : (
+                                <div className="h-[250px] flex items-center justify-center text-xs text-muted-foreground italic">
+                                    No flagged content processed yet.
+                                </div>
+                            )}
                         </DashboardCard>
                     </div>
                 </div>
@@ -285,7 +334,7 @@ export default function TrendAnalysisPage() {
                                 {isAnalyzing ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : "Analyze Content"}
                             </Button>
 
-                            {analysisResult && (
+                            {analysisResult && !analysisResult.error && (
                                 <div className="p-4 bg-muted/30 rounded-md space-y-3 border border-border/50 animate-in fade-in slide-in-from-top-2">
                                     <div className="flex items-center justify-between">
                                         <span className="text-xs font-mono text-muted-foreground">CATEGORY</span>
@@ -295,14 +344,43 @@ export default function TrendAnalysisPage() {
                                     </div>
                                     <div className="flex items-center justify-between">
                                         <span className="text-xs font-mono text-muted-foreground">CONFIDENCE</span>
-                                        <span className={`text-xs font-bold font-mono ${analysisResult.predictionProbability > 80 ? 'text-primary' : 'text-muted-foreground'}`}>
-                                            {analysisResult.predictionProbability}%
+                                        <span className={`text-xs font-bold font-mono ${(analysisResult.confidence ?? 0) > 80 ? 'text-primary' : 'text-muted-foreground'}`}>
+                                            {analysisResult.confidence}%
                                         </span>
                                     </div>
-                                    <div className="pt-2 border-t border-border/30">
-                                        <p className="text-[10px] text-muted-foreground leading-relaxed">{analysisResult.explanation}</p>
-                                    </div>
+                                    {analysisResult.requires_human_review && (
+                                        <>
+                                            <div className="flex items-center gap-2 pt-2 border-t border-border/30">
+                                                <Badge variant="outline" className="uppercase text-[10px]">{analysisResult.final_tier} tier</Badge>
+                                                {analysisResult.cluster?.campaign_flag && (
+                                                    <Badge variant="destructive" className="gap-1 text-[10px]">
+                                                        <UsersIcon className="h-3 w-3" /> Campaign
+                                                    </Badge>
+                                                )}
+                                            </div>
+                                            {analysisResult.legal_matches && analysisResult.legal_matches.length > 0 && (
+                                                <div className="pt-2 border-t border-border/30 space-y-1.5">
+                                                    <h4 className="text-[10px] font-semibold flex items-center gap-1 text-muted-foreground uppercase tracking-wider">
+                                                        <Scale className="h-3 w-3" /> Legal Grounding
+                                                    </h4>
+                                                    {analysisResult.legal_matches.map((m, i) =>
+                                                        m.id === "unmapped" ? (
+                                                            <p key={i} className="text-[10px] text-muted-foreground italic">Not yet mapped — needs manual legal review.</p>
+                                                        ) : (
+                                                            <p key={i} className="text-[10px] text-foreground">{m.law} — {m.section}</p>
+                                                        )
+                                                    )}
+                                                </div>
+                                            )}
+                                            <a href="/review-queue" className="block text-[10px] text-primary underline underline-offset-2 pt-1">
+                                                Added to Review Queue →
+                                            </a>
+                                        </>
+                                    )}
                                 </div>
+                            )}
+                            {analysisResult?.error && (
+                                <p className="text-xs text-destructive">{analysisResult.message}</p>
                             )}
                         </div>
                     </DashboardCard>

@@ -17,15 +17,16 @@ import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { Loader2, Wand2, ThumbsUp, ThumbsDown } from "lucide-react";
-import { api } from "@/lib/api";
+import { Loader2, Wand2, ThumbsUp, ThumbsDown, Scale, Users, ShieldAlert } from "lucide-react";
+import { api, ProcessResponse } from "@/lib/api";
 
 const formSchema = z.object({
   text: z.string().min(10, { message: "Please enter at least 10 characters." }),
 });
 
 export default function AiAnalyzer() {
-  const [analysis, setAnalysis] = useState<any | null>(null);
+  const [analysis, setAnalysis] = useState<ProcessResponse | null>(null);
+  const [submittedText, setSubmittedText] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -41,11 +42,12 @@ export default function AiAnalyzer() {
     setError(null);
     setAnalysis(null);
     try {
-      const result = await api.analyze(values.text);
+      const result = await api.process(values.text);
       if (result.error) {
         setError(result.message || "Analysis failed");
       } else {
         setAnalysis(result);
+        setSubmittedText(values.text);
       }
     } catch (e) {
       setError("Failed to analyze the text. Please try again.");
@@ -114,38 +116,80 @@ export default function AiAnalyzer() {
                 </div>
 
                 <div className="bg-muted/30 p-4 rounded-md text-sm text-foreground/80">
-                  {analysis.text}
+                  {submittedText}
                 </div>
 
                 <div className="space-y-4">
                   <div className="space-y-1">
                     <div className="flex justify-between text-sm font-medium">
                       <span>Neutral</span>
-                      <span>{analysis.scores.neutral}%</span>
+                      <span>{analysis.scores?.neutral ?? 0}%</span>
                     </div>
-                    <Progress value={analysis.scores.neutral} className="h-2 bg-muted [&>div]:bg-emerald-500" />
+                    <Progress value={analysis.scores?.neutral ?? 0} className="h-2 bg-muted [&>div]:bg-emerald-500" />
                   </div>
 
                   <div className="space-y-1">
                     <div className="flex justify-between text-sm font-medium">
                       <span>Offensive</span>
-                      <span>{analysis.scores.offensive}%</span>
+                      <span>{analysis.scores?.offensive ?? 0}%</span>
                     </div>
-                    <Progress value={analysis.scores.offensive} className="h-2 bg-muted [&>div]:bg-amber-500" />
+                    <Progress value={analysis.scores?.offensive ?? 0} className="h-2 bg-muted [&>div]:bg-amber-500" />
                   </div>
 
                   <div className="space-y-1">
                     <div className="flex justify-between text-sm font-medium">
                       <span>Hate</span>
-                      <span>{analysis.scores.hate}%</span>
+                      <span>{analysis.scores?.hate ?? 0}%</span>
                     </div>
-                    <Progress value={analysis.scores.hate} className="h-2 bg-muted [&>div]:bg-destructive" />
+                    <Progress value={analysis.scores?.hate ?? 0} className="h-2 bg-muted [&>div]:bg-destructive" />
                   </div>
                 </div>
 
                 <div className="pt-2 border-t border-border/50">
                   <p className="text-xs text-muted-foreground">Detected Language: <span className="font-medium text-foreground">{analysis.language}</span></p>
                 </div>
+
+                {analysis.requires_human_review && (
+                  <div className="pt-2 border-t border-border/50 space-y-3">
+                    <div className="flex items-center gap-2 text-xs">
+                      <Badge variant="outline" className="uppercase">{analysis.final_tier} tier</Badge>
+                      {analysis.cluster?.campaign_flag && (
+                        <Badge variant="destructive" className="gap-1">
+                          <Users className="h-3 w-3" /> Possible campaign
+                        </Badge>
+                      )}
+                    </div>
+
+                    {analysis.legal_matches && analysis.legal_matches.length > 0 && (
+                      <div>
+                        <h4 className="text-xs font-semibold flex items-center gap-1.5 mb-2">
+                          <Scale className="h-3.5 w-3.5" /> Legal Grounding
+                        </h4>
+                        <div className="space-y-1.5">
+                          {analysis.legal_matches.map((m, i) =>
+                            m.id === "unmapped" ? (
+                              <p key={i} className="text-xs text-muted-foreground italic">
+                                No provision mapped yet — requires manual legal review.
+                              </p>
+                            ) : (
+                              <div key={i} className="text-xs bg-muted/50 p-2 rounded border">
+                                <span className="font-medium">{m.law} — {m.section}</span>
+                                {m.title && <p className="text-muted-foreground mt-0.5">{m.title}</p>}
+                              </div>
+                            )
+                          )}
+                        </div>
+                        <p className="text-[10px] text-muted-foreground mt-2">
+                          Assistive drafting aid only — not an authoritative legal determination.
+                        </p>
+                      </div>
+                    )}
+
+                    <a href="/review-queue" className="text-xs text-primary underline underline-offset-2">
+                      This case was added to the Review Queue →
+                    </a>
+                  </div>
+                )}
 
                 <div className="flex items-center justify-between pt-2">
                   <span className="text-xs text-muted-foreground">Was this analysis helpful?</span>
