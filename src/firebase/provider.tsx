@@ -10,9 +10,9 @@ type FirebaseContextValue = {
   app: FirebaseApp;
   firestore: Firestore;
   auth: Auth;
-};
+} | null;
 
-const FirebaseContext = createContext<FirebaseContextValue | null>(null);
+const FirebaseContext = createContext<FirebaseContextValue>(null);
 
 export function FirebaseProvider({ children }: { children: ReactNode }) {
   const firebase = useMemo(() => initializeFirebase(), []);
@@ -27,23 +27,24 @@ export function FirebaseProvider({ children }: { children: ReactNode }) {
 export const useFirebaseApp = () => {
   const context = useContext(FirebaseContext);
   if (!context) {
-    throw new Error('useFirebaseApp must be used within a FirebaseProvider');
+    return null;
   }
   return context.app;
 };
 
-export const useFirestore = () => {
+export const useFirestore = (): Firestore | null => {
   const context = useContext(FirebaseContext);
   if (!context) {
-    throw new Error('useFirestore must be used within a FirebaseProvider');
+    return null;
   }
   return context.firestore;
 };
 
-export const useAuth = () => {
+export const useAuth = (): Auth | null => {
   const context = useContext(FirebaseContext);
   if (!context) {
-    throw new Error('useAuth must be used within a FirebaseProvider');
+    return null;
   }
   return context.auth;
 };
+

@@ -293,10 +293,10 @@ export default function ReviewQueueDetailsSheet({ item, isOpen, onOpenChange, on
         ) : (
           <SheetFooter className="mt-auto border-t pt-4">
             <div className="w-full text-sm space-y-1">
-              <p>
+              <div className="flex items-center gap-2">
                 <span className="text-muted-foreground">Decision:</span>{" "}
                 <Badge variant="outline">{item.decision}</Badge>
-              </p>
+              </div>
               {item.decided_by && (
                 <p className="text-muted-foreground text-xs">
                   By {item.decided_by} on {item.decided_at ? format(new Date(item.decided_at), "PPP p") : "—"}

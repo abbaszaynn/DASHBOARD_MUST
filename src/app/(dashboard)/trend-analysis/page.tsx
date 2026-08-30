@@ -264,6 +264,7 @@ export default function TrendAnalysisPage() {
                                     value={currentTrends}
                                     onChange={(e) => setCurrentTrends(e.target.value)}
                                     className="bg-background/50 border-border/50 text-xs resize-none focus-visible:ring-primary/50"
+                                    suppressHydrationWarning
                                 />
                             </div>
                             <div className="space-y-2">
@@ -273,6 +274,7 @@ export default function TrendAnalysisPage() {
                                     value={flaggedSummary}
                                     onChange={(e) => setFlaggedSummary(e.target.value)}
                                     className="bg-background/50 border-border/50 text-xs resize-none focus-visible:ring-primary/50"
+                                    suppressHydrationWarning
                                 />
                             </div>
                             <Button

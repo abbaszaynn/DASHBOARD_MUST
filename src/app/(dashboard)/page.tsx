@@ -1,19 +1,32 @@
 "use client"
 
 import { useEffect, useState } from "react";
+import dynamic from "next/dynamic";
 import { Badge } from "@/components/ui/badge";
 import { Users, Flag, ShieldAlert, TrendingUp, BarChart3, Activity, Radio, AlertTriangle } from "lucide-react";
 import type { FlaggedPost } from "@/types";
 import { Skeleton } from "@/components/ui/skeleton";
-import AiAnalyzer from "@/components/dashboard/ai-analyzer";
-import { Bar, BarChart, CartesianGrid, Line, LineChart, Tooltip, XAxis, YAxis, LabelList, Cell, Area, AreaChart } from "recharts";
-import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
 import { weeklyTrends } from "@/lib/data";
 import TimeAgo from "@/components/time-ago";
 import { DashboardCard } from "@/components/dashboard-card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { api, TrendStats, MonitoringUser, FlaggedItem, PlatformStat } from "@/lib/api";
-import { LiveFeed } from "@/components/dashboard/live-feed";
+
+// Lazy-load heavy sidebar components so they don't block initial page render
+const AiAnalyzer = dynamic(() => import("@/components/dashboard/ai-analyzer"), {
+  ssr: false,
+  loading: () => <div className="rounded-lg border border-border/50 bg-card p-6"><Skeleton className="h-40 w-full" /></div>,
+});
+const LiveFeed = dynamic(
+  () => import("@/components/dashboard/live-feed").then((m) => ({ default: m.LiveFeed })),
+  {
+    ssr: false,
+    loading: () => <div className="rounded-lg border border-border/50 bg-card p-6"><Skeleton className="h-[400px] w-full" /></div>,
+  }
+);
+
+import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
+import { Bar, BarChart, CartesianGrid, Tooltip, XAxis, YAxis, LabelList, Cell, Area, AreaChart } from "recharts";
 
 const chartConfigWeekly = {
   Hate: { label: "Hate", color: "hsl(var(--chart-5))" },

@@ -21,7 +21,7 @@ export function DashboardCard({
     return (
         <Card
             className={cn(
-                "border-border/50 bg-card/50 backdrop-blur-sm shadow-sm animate-in fade-in-50 slide-in-from-bottom-5 duration-500",
+                "border-border/50 bg-card shadow-sm animate-in fade-in duration-300",
                 className
             )}
             {...props}

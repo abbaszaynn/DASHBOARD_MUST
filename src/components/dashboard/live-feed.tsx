@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef, useCallback } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -11,26 +11,61 @@ import { Activity, Facebook, Twitter, Globe } from "lucide-react";
 export function LiveFeed() {
     const [items, setItems] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
+    const abortRef = useRef<AbortController | null>(null);
 
-    const fetchFeed = async () => {
+    const fetchFeed = useCallback(async () => {
+        // Cancel any in-flight request
+        abortRef.current?.abort();
+        const controller = new AbortController();
+        abortRef.current = controller;
+
         try {
             const response = await api.getLiveFeed();
-            if (!response.error) {
+            if (!controller.signal.aborted && !response.error) {
                 setItems(response.data);
             }
         } catch (error) {
-            console.error("Failed to fetch live feed", error);
+            if (!controller.signal.aborted) {
+                console.error("Failed to fetch live feed", error);
+            }
         } finally {
-            setLoading(false);
+            if (!controller.signal.aborted) {
+                setLoading(false);
+            }
         }
-    };
+    }, []);
 
     useEffect(() => {
         fetchFeed();
-        // Poll every 10 seconds
-        const interval = setInterval(fetchFeed, 10000);
-        return () => clearInterval(interval);
-    }, []);
+
+        // Poll every 30 seconds instead of 10 — data doesn't change that fast
+        // and pause when the tab is inactive to save resources
+        let interval: ReturnType<typeof setInterval>;
+
+        const startPolling = () => {
+            interval = setInterval(() => {
+                if (document.visibilityState === "visible") {
+                    fetchFeed();
+                }
+            }, 30000);
+        };
+
+        const handleVisibility = () => {
+            if (document.visibilityState === "visible") {
+                // Fetch immediately when tab becomes visible again
+                fetchFeed();
+            }
+        };
+
+        startPolling();
+        document.addEventListener("visibilitychange", handleVisibility);
+
+        return () => {
+            clearInterval(interval);
+            document.removeEventListener("visibilitychange", handleVisibility);
+            abortRef.current?.abort();
+        };
+    }, [fetchFeed]);
 
     const getPlatformIcon = (platform: string) => {
         switch (platform?.toLowerCase()) {

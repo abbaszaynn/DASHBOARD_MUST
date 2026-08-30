@@ -4,6 +4,19 @@
  */
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? '/api/py';
 
+/**
+ * Shared-secret gate for the backend's sensitive endpoints (see MUST_backend/agents/auth.py).
+ * This is a basic access gate, not real auth - since this key ships in the client bundle,
+ * it deters casual/opportunistic access to a public deployment, not a targeted attacker
+ * inspecting network requests. Must match the backend's SENTINEL_API_KEY secret.
+ */
+const API_KEY = process.env.NEXT_PUBLIC_SENTINEL_API_KEY ?? '';
+
+const authHeaders = (extra?: Record<string, string>): Record<string, string> => ({
+    ...(API_KEY ? { 'X-API-Key': API_KEY } : {}),
+    ...extra,
+});
+
 const emptyTrends = (): TrendsResponse => ({
     error: true,
     stats: { hate: 0, offensive: 0, neutral: 0, total: 0 },
@@ -258,7 +271,7 @@ export const api = {
 
     getTrends: async (): Promise<TrendsResponse> => {
         try {
-            const response = await fetch(`${API_BASE_URL}/trends`);
+            const response = await fetch(`${API_BASE_URL}/trends`, { headers: authHeaders() });
             const data = (await response.json().catch(() => null)) as TrendsResponse | null;
             if (!response.ok || !data) {
                 return emptyTrends();
@@ -271,7 +284,7 @@ export const api = {
 
     getMonitoring: async (): Promise<MonitoringResponse> => {
         try {
-            const response = await fetch(`${API_BASE_URL}/monitoring`);
+            const response = await fetch(`${API_BASE_URL}/monitoring`, { headers: authHeaders() });
             const data = (await response.json().catch(() => null)) as MonitoringResponse | null;
             if (!response.ok || !data) {
                 return emptyMonitoring();
@@ -286,7 +299,7 @@ export const api = {
         try {
             const response = await fetch(`${API_BASE_URL}/scrape`, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: authHeaders({ 'Content-Type': 'application/json' }),
                 body: JSON.stringify({ url }),
             });
             const raw = (await response.json().catch(() => ({}))) as Record<
@@ -319,7 +332,7 @@ export const api = {
 
     getFlagged: async (): Promise<FlaggedResponse> => {
         try {
-            const response = await fetch(`${API_BASE_URL}/flagged`);
+            const response = await fetch(`${API_BASE_URL}/flagged`, { headers: authHeaders() });
             const data = (await response.json().catch(() => null)) as FlaggedResponse | null;
             if (!response.ok || !data) {
                 return emptyFlagged();
@@ -332,7 +345,7 @@ export const api = {
 
     getLiveFeed: async (): Promise<FlaggedResponse> => {
         try {
-            const response = await fetch(`${API_BASE_URL}/live-feed`);
+            const response = await fetch(`${API_BASE_URL}/live-feed`, { headers: authHeaders() });
             const data = (await response.json().catch(() => null)) as FlaggedResponse | null;
             if (!response.ok || !data) {
                 return emptyFlagged();
@@ -353,7 +366,7 @@ export const api = {
         try {
             const response = await fetch(`${API_BASE_URL}/process`, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: authHeaders({ 'Content-Type': 'application/json' }),
                 body: JSON.stringify({ text, username, platform }),
             });
             const raw = (await response.json().catch(() => ({}))) as Record<string, unknown>;
@@ -391,7 +404,7 @@ export const api = {
         try {
             const response = await fetch(`${API_BASE_URL}/ingest-and-process`, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: authHeaders({ 'Content-Type': 'application/json' }),
                 body: JSON.stringify({ limit, source }),
             });
             const data = (await response.json().catch(() => null)) as IngestAndProcessResponse | null;
@@ -413,7 +426,9 @@ export const api = {
             if (opts.platform) params.set('platform', opts.platform);
             if (opts.limit !== undefined) params.set('limit', String(opts.limit));
             if (opts.offset !== undefined) params.set('offset', String(opts.offset));
-            const response = await fetch(`${API_BASE_URL}/review-queue?${params.toString()}`);
+            const response = await fetch(`${API_BASE_URL}/review-queue?${params.toString()}`, {
+                headers: authHeaders(),
+            });
             const data = (await response.json().catch(() => null)) as ReviewQueueResponse | null;
             if (!response.ok || !data) {
                 return { error: true, total: 0, data: [] };
@@ -433,7 +448,7 @@ export const api = {
         try {
             const response = await fetch(`${API_BASE_URL}/review-queue/${reviewQueueId}/decision`, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: authHeaders({ 'Content-Type': 'application/json' }),
                 body: JSON.stringify({ decision, decided_by, notes }),
             });
             const raw = (await response.json().catch(() => ({}))) as Record<string, unknown>;
@@ -448,7 +463,7 @@ export const api = {
 
     getDistrictStats: async (): Promise<StatsResponse<DistrictStat>> => {
         try {
-            const response = await fetch(`${API_BASE_URL}/stats/districts`);
+            const response = await fetch(`${API_BASE_URL}/stats/districts`, { headers: authHeaders() });
             const data = (await response.json().catch(() => null)) as StatsResponse<DistrictStat> | null;
             if (!response.ok || !data) return { error: true, data: [] };
             return data;
@@ -459,7 +474,7 @@ export const api = {
 
     getPlatformStats: async (): Promise<StatsResponse<PlatformStat>> => {
         try {
-            const response = await fetch(`${API_BASE_URL}/stats/platforms`);
+            const response = await fetch(`${API_BASE_URL}/stats/platforms`, { headers: authHeaders() });
             const data = (await response.json().catch(() => null)) as StatsResponse<PlatformStat> | null;
             if (!response.ok || !data) return { error: true, data: [] };
             return data;
