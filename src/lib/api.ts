@@ -66,6 +66,36 @@ export interface MonitoringUser {
     platform: string;
     risk_score: number;
     last_active: string;
+    profile_url?: string | null;
+    district?: string | null;
+    last_scrape_status?: 'NEVER' | 'STARTING' | 'RUNNING' | 'PROCESSING' | 'SUCCEEDED' | 'FAILED' | null;
+    last_scrape_at?: string | null;
+    last_scrape_note?: string | null;
+}
+
+export interface TargetPost {
+    id: number;
+    text: string;
+    category: 'hate' | 'offensive' | 'neutral' | string;
+    confidence: number;
+    language: string;
+    timestamp: string;
+    case_file_id: number | null;
+    review_status: 'open' | 'closed' | null;
+}
+
+export interface ScrapeRun {
+    id: number;
+    user_id: number;
+    username: string;
+    profile_url: string | null;
+    apify_run_id: string | null;
+    status: string;
+    posts: number;
+    flagged: number;
+    error: string | null;
+    started_at: string | null;
+    finished_at: string | null;
 }
 
 export interface MonitoringResponse {
@@ -144,6 +174,7 @@ export interface ProcessResponse {
 
 export interface IngestAndProcessResponse {
     error: boolean;
+    message?: string;
     source_used: string;
     processed: number;
     flagged: number;
@@ -400,20 +431,100 @@ export const api = {
         }
     },
 
-    ingestAndProcess: async (limit: number = 20, source: string = 'auto'): Promise<IngestAndProcessResponse> => {
+    ingestAndProcess: async (
+        limit: number = 20,
+        source: string = 'auto',
+        urls?: string[]
+    ): Promise<IngestAndProcessResponse> => {
+        const failed = (message: string): IngestAndProcessResponse => ({
+            error: true, message, source_used: source, processed: 0, flagged: 0, results: [],
+        });
         try {
             const response = await fetch(`${API_BASE_URL}/ingest-and-process`, {
                 method: 'POST',
                 headers: authHeaders({ 'Content-Type': 'application/json' }),
-                body: JSON.stringify({ limit, source }),
+                body: JSON.stringify({ limit, source, urls }),
             });
             const data = (await response.json().catch(() => null)) as IngestAndProcessResponse | null;
             if (!response.ok || !data) {
-                return { error: true, source_used: source, processed: 0, flagged: 0, results: [] };
+                return failed(data?.message || `Ingestion failed (${response.status})`);
             }
             return data;
         } catch {
-            return { error: true, source_used: source, processed: 0, flagged: 0, results: [] };
+            return failed('Could not reach the backend. Is it running?');
+        }
+    },
+
+    getIngestStatus: async (): Promise<{
+        error: boolean;
+        apify_configured: boolean;
+        actor: string;
+        start_urls: string[];
+        max_results_per_page: number;
+    }> => {
+        const none = { error: true, apify_configured: false, actor: '', start_urls: [], max_results_per_page: 0 };
+        try {
+            const response = await fetch(`${API_BASE_URL}/ingest/status`, { headers: authHeaders() });
+            const data = await response.json().catch(() => null);
+            return response.ok && data ? data : none;
+        } catch {
+            return none;
+        }
+    },
+
+    // --- Monitored targets ---
+
+    addTarget: async (
+        profile_url: string,
+        name?: string,
+        district?: string
+    ): Promise<{ error: boolean; message?: string; id?: number }> => {
+        try {
+            const response = await fetch(`${API_BASE_URL}/targets`, {
+                method: 'POST',
+                headers: authHeaders({ 'Content-Type': 'application/json' }),
+                body: JSON.stringify({ profile_url, name: name || undefined, district: district || undefined }),
+            });
+            const data = await response.json().catch(() => null);
+            if (!response.ok || !data) return { error: true, message: data?.message || `Could not add target (${response.status})` };
+            return data;
+        } catch {
+            return { error: true, message: 'Could not reach the backend. Is it running?' };
+        }
+    },
+
+    scrapeTarget: async (userId: number, limit: number = 10): Promise<{ error: boolean; message?: string }> => {
+        try {
+            const response = await fetch(`${API_BASE_URL}/targets/${userId}/scrape?limit=${limit}`, {
+                method: 'POST',
+                headers: authHeaders(),
+            });
+            const data = await response.json().catch(() => null);
+            if (!response.ok || !data) return { error: true, message: data?.message || `Could not start scrape (${response.status})` };
+            return data;
+        } catch {
+            return { error: true, message: 'Could not reach the backend. Is it running?' };
+        }
+    },
+
+    getScrapeRuns: async (userId?: number): Promise<StatsResponse<ScrapeRun>> => {
+        try {
+            const q = userId !== undefined ? `?user_id=${userId}` : '';
+            const response = await fetch(`${API_BASE_URL}/scrape-runs${q}`, { headers: authHeaders() });
+            const data = await response.json().catch(() => null);
+            return response.ok && data ? data : { error: true, data: [] };
+        } catch {
+            return { error: true, data: [] };
+        }
+    },
+
+    getTargetPosts: async (userId: number): Promise<StatsResponse<TargetPost>> => {
+        try {
+            const response = await fetch(`${API_BASE_URL}/targets/${userId}/posts`, { headers: authHeaders() });
+            const data = await response.json().catch(() => null);
+            return response.ok && data ? data : { error: true, data: [] };
+        } catch {
+            return { error: true, data: [] };
         }
     },
 
@@ -455,7 +566,7 @@ export const api = {
             if (!response.ok) {
                 return { error: true, message: (raw.message as string) || `Decision failed (${response.status})` };
             }
-            return raw as DecisionResponse;
+            return raw as unknown as DecisionResponse;
         } catch {
             return { error: true, message: 'Could not reach the backend.' };
         }

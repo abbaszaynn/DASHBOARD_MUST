@@ -13,7 +13,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { PageHeader } from "@/components/page-header";
-import { ShieldAlert, Scale, Users, RefreshCw } from "lucide-react";
+import { ShieldAlert, Scale, Users, RefreshCw, Download, Loader2 } from "lucide-react";
 import { format } from "date-fns";
 import { api, ReviewQueueItem } from "@/lib/api";
 import ReviewQueueDetailsSheet from "./components/review-queue-details-sheet";
@@ -74,6 +74,26 @@ export default function ReviewQueuePage() {
     fetchQueue(status);
   };
 
+  const [ingesting, setIngesting] = useState(false);
+  const [ingestNote, setIngestNote] = useState<{ ok: boolean; text: string } | null>(null);
+
+  const handleIngest = async () => {
+    setIngesting(true);
+    setIngestNote(null);
+    const r = await api.ingestAndProcess(10, "apify");
+    if (r.error) {
+      setIngestNote({ ok: false, text: r.message || "Ingestion failed." });
+    } else {
+      setIngestNote({
+        ok: true,
+        text: `Scraped ${r.processed} post${r.processed === 1 ? "" : "s"} from Facebook via Apify — ${r.flagged} flagged and added to the queue.`,
+      });
+      setStatus("open");
+      fetchQueue("open");
+    }
+    setIngesting(false);
+  };
+
   return (
     <>
       <PageHeader
@@ -98,8 +118,22 @@ export default function ReviewQueuePage() {
           <Button variant="ghost" size="icon" onClick={() => fetchQueue(status)} title="Refresh">
             <RefreshCw className="h-4 w-4" />
           </Button>
+          <Button variant="outline" size="sm" onClick={handleIngest} disabled={ingesting}>
+            {ingesting ? <Loader2 className="h-4 w-4 mr-1 animate-spin" /> : <Download className="h-4 w-4 mr-1" />}
+            {ingesting ? "Scraping…" : "Fetch from Facebook"}
+          </Button>
         </div>
       </PageHeader>
+      {ingesting && (
+        <p className="text-xs text-muted-foreground -mt-3 mb-4">
+          Running the Apify scraper and classifying each post — this usually takes one to three minutes.
+        </p>
+      )}
+      {ingestNote && !ingesting && (
+        <p className={`text-xs -mt-3 mb-4 ${ingestNote.ok ? "text-muted-foreground" : "text-destructive"}`}>
+          {ingestNote.text}
+        </p>
+      )}
 
       <div className="border rounded-lg">
         <Table>

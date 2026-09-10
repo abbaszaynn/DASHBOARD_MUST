@@ -5,6 +5,12 @@ const backendOrigin =
 
 const nextConfig: NextConfig = {
   /* config options here */
+  experimental: {
+    // The /api/py rewrite proxy aborts after 30s by default. A live Apify scrape
+    // (up to ~5 min) and the backend's first model-loading request both run past
+    // that, and surface as a 500 even though the backend finishes the work.
+    proxyTimeout: 300_000,
+  },
   async rewrites() {
     return [
       {

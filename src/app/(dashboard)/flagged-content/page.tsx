@@ -34,8 +34,12 @@ import {
 } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
 import type { FlaggedPost } from "@/types";
-import PostDetailsSheet from "./components/post-details-sheet";
+import dynamic from "next/dynamic";
 import { useFirestore } from "@/firebase";
+import { FirebaseClientProvider } from "@/firebase/client-provider";
+
+// Loaded on first row click, keeping the AI analysis code out of the initial page load.
+const PostDetailsSheet = dynamic(() => import("./components/post-details-sheet"), { ssr: false });
 import { useCollection } from "@/hooks/use-collection";
 import { collection, query, orderBy, Timestamp } from "firebase/firestore";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -64,7 +68,17 @@ const mapDocToFlaggedPost = (doc: any): FlaggedPost => {
 };
 
 
+// This is the only page that reads Firestore, so the Firebase SDK is provided
+// here rather than in the root layout, where it was downloaded on every page.
 export default function FlaggedContentPage() {
+  return (
+    <FirebaseClientProvider>
+      <FlaggedContentView />
+    </FirebaseClientProvider>
+  );
+}
+
+function FlaggedContentView() {
   const [selectedPost, setSelectedPost] = useState<FlaggedPost | null>(null);
   const [isSheetOpen, setSheetOpen] = useState(false);
   const [date, setDate] = useState<DateRange | undefined>({
