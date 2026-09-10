@@ -19,9 +19,11 @@ export default function PrivacyPolicyPage() {
               entered by an analyst for classification.
             </li>
             <li>
-              <strong className="text-foreground">Ingested public post data</strong> — text, a
-              platform-provided username/handle, platform name, and (where available) coarse
-              location metadata, sourced from a configured public-content scraper.
+              <strong className="text-foreground">Ingested public content</strong> — the text of
+              posts on monitored public pages and of the public comments left under them, the
+              public display name of each page and commenter, and links to the original posts,
+              collected through a licensed data provider. Location is not collected: each monitored
+              page is assigned a district by an officer, and content from it is counted there.
             </li>
             <li>
               <strong className="text-foreground">Review decisions</strong> — the reviewing officer's

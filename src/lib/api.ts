@@ -75,13 +75,18 @@ export interface MonitoringUser {
 
 export interface TargetPost {
     id: number;
+    kind: 'post' | 'comment';
+    author: string | null;
     text: string;
-    category: 'hate' | 'offensive' | 'neutral' | string;
-    confidence: number;
-    language: string;
-    timestamp: string;
+    url: string | null;
+    parent_url: string | null; // for comments: the post they were left on
+    posted_at: string | null;
+    category: 'hate' | 'offensive' | 'neutral' | null; // null = not classified (e.g. emoji-only)
+    confidence: number | null;
+    language: string | null;
     case_file_id: number | null;
     review_status: 'open' | 'closed' | null;
+    created_at: string;
 }
 
 export interface ScrapeRun {
@@ -92,6 +97,7 @@ export interface ScrapeRun {
     apify_run_id: string | null;
     status: string;
     posts: number;
+    comments: number;
     flagged: number;
     error: string | null;
     started_at: string | null;
