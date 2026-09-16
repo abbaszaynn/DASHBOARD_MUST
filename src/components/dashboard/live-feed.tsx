@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { api, FlaggedItem } from "@/lib/api";
+import { isArabicScript } from "@/lib/utils";
 import { Activity, Facebook, Twitter, Globe } from "lucide-react";
 
 export function LiveFeed() {
@@ -123,7 +124,11 @@ export function LiveFeed() {
                                         <span className="text-[10px] text-muted-foreground">{item.timestamp}</span>
                                     </div>
 
-                                    <p className="text-foreground/80 break-words leading-relaxed text-xs line-clamp-3">
+                                    <p
+                                        className={`text-foreground/80 break-words leading-relaxed text-xs line-clamp-3 ${
+                                            isArabicScript(item.text) ? "urdu-inline" : ""
+                                        }`}
+                                    >
                                         {item.text}
                                     </p>
 

@@ -39,6 +39,8 @@ export default function SettingsPage() {
     return (
         <>
             <PageHeader
+                eyebrow="System"
+                icon={KeyRound}
                 title="Settings"
                 description="Manage system-wide settings and watchlists."
             />

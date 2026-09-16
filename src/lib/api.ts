@@ -610,4 +610,282 @@ export const api = {
             return { error: true, data: [] };
         }
     },
+
+    // --- Collection record, clustering and sarcasm ---
+
+    getApifyStats: async (): Promise<ApifyOverview> => {
+        try {
+            const response = await fetch(`${API_BASE_URL}/stats/apify`, { headers: authHeaders() });
+            const data = (await response.json().catch(() => null)) as ApifyOverview | null;
+            if (!response.ok || !data) return emptyApify();
+            return data;
+        } catch {
+            return emptyApify();
+        }
+    },
+
+    getClusters: async (): Promise<ClustersResponse> => {
+        const none: ClustersResponse = { error: true, data: [], config: null };
+        try {
+            const response = await fetch(`${API_BASE_URL}/clusters`, { headers: authHeaders() });
+            const data = (await response.json().catch(() => null)) as ClustersResponse | null;
+            if (!response.ok || !data) return none;
+            return data;
+        } catch {
+            return none;
+        }
+    },
+
+    getSarcasm: async (): Promise<SarcasmOverview> => {
+        const none: SarcasmOverview = {
+            error: true,
+            totals: { case_files: 0, scored: 0, flagged: 0 },
+            recent: [],
+            config: null,
+        };
+        try {
+            const response = await fetch(`${API_BASE_URL}/sarcasm`, { headers: authHeaders() });
+            const data = (await response.json().catch(() => null)) as SarcasmOverview | null;
+            if (!response.ok || !data) return none;
+            return data;
+        } catch {
+            return none;
+        }
+    },
+
+    testSarcasm: async (text: string): Promise<SarcasmTestResult> => {
+        const none: SarcasmTestResult = {
+            error: true,
+            score: 0,
+            flag: false,
+            matched_markers: [],
+            contrast_pattern: false,
+            note: 'Could not reach the backend.',
+        };
+        try {
+            const response = await fetch(`${API_BASE_URL}/sarcasm/test`, {
+                method: 'POST',
+                headers: authHeaders({ 'Content-Type': 'application/json' }),
+                body: JSON.stringify({ text }),
+            });
+            const data = (await response.json().catch(() => null)) as SarcasmTestResult | null;
+            if (!response.ok || !data) return none;
+            return data;
+        } catch {
+            return none;
+        }
+    },
+
+    getPipelineConfig: async (): Promise<PipelineConfig | null> => {
+        try {
+            const response = await fetch(`${API_BASE_URL}/pipeline/config`, { headers: authHeaders() });
+            const data = (await response.json().catch(() => null)) as PipelineConfig | null;
+            return response.ok ? data : null;
+        } catch {
+            return null;
+        }
+    },
 };
+
+// --- Collection record, clustering and sarcasm types ---
+
+export interface ApifyRunItems {
+    items?: number;
+    hate?: number;
+    offensive?: number;
+    neutral?: number;
+    unclassified?: number;
+}
+
+export interface ApifyRun {
+    id: number;
+    user_id: number;
+    apify_run_id: string | null;
+    status: string;
+    posts: number;
+    comments: number;
+    flagged: number;
+    error: string | null;
+    started_at: string | null;
+    finished_at: string | null;
+    username: string;
+    profile_url: string | null;
+    district: string | null;
+    duration_seconds: number | null;
+    cost_usd: number;
+    cost_pkr: number;
+    items: ApifyRunItems;
+}
+
+export interface ApifyTotals {
+    runs: number;
+    succeeded: number;
+    failed: number;
+    active: number;
+    posts_collected: number;
+    comments_collected: number;
+    items_stored: number;
+    posts_stored: number;
+    comments_stored: number;
+    hate: number;
+    offensive: number;
+    neutral: number;
+    unclassified: number;
+    flagged: number;
+    flag_rate: number;
+    comments_per_post: number;
+}
+
+export interface ApifyCost {
+    total_usd: number;
+    total_pkr: number;
+    per_flagged_usd: number | null;
+    post_price_usd: number;
+    comment_price_usd: number;
+    start_fee_usd: number;
+    pkr_per_usd: number;
+    basis: string;
+}
+
+export interface ApifyCadence {
+    scheduled: boolean;
+    trigger: string;
+    comments_requested_per_post: number;
+    avg_run_seconds: number | null;
+    longest_run_seconds: number | null;
+    avg_gap_seconds: number | null;
+    first_run_at: string | null;
+    last_run_at: string | null;
+}
+
+export interface ApifyOverview {
+    error: boolean;
+    runs: ApifyRun[];
+    totals: ApifyTotals;
+    cost: ApifyCost;
+    cadence: ApifyCadence;
+}
+
+const emptyApify = (): ApifyOverview => ({
+    error: true,
+    runs: [],
+    totals: {
+        runs: 0, succeeded: 0, failed: 0, active: 0,
+        posts_collected: 0, comments_collected: 0, items_stored: 0,
+        posts_stored: 0, comments_stored: 0, hate: 0, offensive: 0,
+        neutral: 0, unclassified: 0, flagged: 0, flag_rate: 0, comments_per_post: 0,
+    },
+    cost: {
+        total_usd: 0, total_pkr: 0, per_flagged_usd: null,
+        post_price_usd: 0, comment_price_usd: 0, start_fee_usd: 0,
+        pkr_per_usd: 0, basis: '',
+    },
+    cadence: {
+        scheduled: false, trigger: '', comments_requested_per_post: 0,
+        avg_run_seconds: null, longest_run_seconds: null, avg_gap_seconds: null,
+        first_run_at: null, last_run_at: null,
+    },
+});
+
+export interface ClusterMember {
+    id: number;
+    cluster_id: number;
+    text: string;
+    similarity_to_centroid: number | null;
+    added_at: string;
+}
+
+export interface ClusterCase {
+    id: number;
+    cluster_id: number;
+    username: string | null;
+    platform: string | null;
+    district: string | null;
+    category: string | null;
+    confidence: number | null;
+    created_at: string;
+    review_queue_id: number | null;
+    review_status: string | null;
+}
+
+export interface ContentCluster {
+    id: number;
+    platform: string | null;
+    representative_text: string;
+    member_count: number;
+    campaign_flag: number;
+    created_at: string;
+    updated_at: string;
+    members: ClusterMember[];
+    cases: ClusterCase[];
+    distinct_authors: number;
+    districts: string[];
+}
+
+export interface ClusterConfig {
+    status: string;
+    similarity_threshold: number;
+    campaign_min_members: number;
+    embedding_model: string;
+    method: string;
+    note: string;
+}
+
+export interface ClustersResponse {
+    error: boolean;
+    data: ContentCluster[];
+    config: ClusterConfig | null;
+}
+
+export interface SarcasmCase {
+    id: number;
+    text: string;
+    category: string | null;
+    confidence: number | null;
+    language: string | null;
+    username: string | null;
+    platform: string | null;
+    district: string | null;
+    sarcasm_score: number | null;
+    sarcasm_flag: number;
+    created_at: string;
+    review_status: string | null;
+}
+
+export interface SarcasmConfig {
+    status: string;
+    markers: string[];
+    contrast_pattern: string;
+    marker_weight: number;
+    contrast_weight: number;
+    flag_threshold: number;
+    runs_between_confidence: [number, number];
+    note: string;
+}
+
+export interface SarcasmOverview {
+    error: boolean;
+    totals: { case_files: number; scored: number; flagged: number };
+    recent: SarcasmCase[];
+    config: SarcasmConfig | null;
+}
+
+export interface SarcasmTestResult {
+    error: boolean;
+    score: number;
+    flag: boolean;
+    matched_markers: string[];
+    contrast_pattern: boolean;
+    note: string;
+}
+
+export interface PipelineConfig {
+    error: boolean;
+    sarcasm_band: [number, number];
+    sarcasm_flag_threshold: number;
+    tier_medium_min: number;
+    tier_high_min: number;
+    cluster_similarity_threshold: number;
+    campaign_min_members: number;
+    human_review_required: boolean;
+}

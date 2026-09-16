@@ -13,6 +13,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import KeywordUsersDialog from "./components/keyword-users-dialog";
 import type { User, FlaggedPost } from "@/types";
 import { DashboardCard } from "@/components/dashboard-card";
+import { PageHeader } from "@/components/page-header";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 
@@ -147,17 +148,25 @@ export default function TrendAnalysisPage() {
 
     return (
         <div className="space-y-6">
-            <div className="flex items-center justify-between">
-                <h1 className="text-2xl font-bold tracking-tight uppercase font-mono">Trend Analysis</h1>
-                <div className="flex items-center space-x-2 bg-card/50 p-2 rounded-md border border-border/50">
+            <PageHeader
+                eyebrow="Overview"
+                icon={TrendingUp}
+                title="Trend Analysis"
+                description="Where flagged content is coming from, by district and platform. District figures reflect the area assigned to each monitored page."
+            >
+                <div className="flex items-center space-x-2 rounded-md border border-border/50 bg-card/50 p-2">
                     <Switch id="compare-mode" checked={compareMode} onCheckedChange={setCompareMode} />
                     <Label htmlFor="compare-mode" className="text-xs font-mono text-muted-foreground">COMPARE PREV. PERIOD</Label>
                 </div>
-            </div>
+            </PageHeader>
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 <div className="lg:col-span-2 space-y-6">
-                    <DashboardCard title="Weekly Threat Volume" icon={TrendingUp}>
+                    <DashboardCard
+                        title="Weekly Threat Volume"
+                        description="Illustrative sample data — not a live series"
+                        icon={TrendingUp}
+                    >
                         <ChartContainer config={chartConfigWeekly} className="h-[300px] w-full">
                             <AreaChart data={weeklyTrends} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
                                 <defs>
@@ -181,6 +190,12 @@ export default function TrendAnalysisPage() {
                                 )}
                             </AreaChart>
                         </ChartContainer>
+                        {/* Labelled rather than silently shown: presenting invented
+                            figures as live data to the Department would be misleading. */}
+                        <p className="mt-2 text-[10px] italic leading-snug text-muted-foreground">
+                            Fixed sample figures. The system does not yet record a daily time series —
+                            live counts are on the Command Center and Apify Records pages.
+                        </p>
                     </DashboardCard>
 
                     <div className="grid md:grid-cols-2 gap-6">

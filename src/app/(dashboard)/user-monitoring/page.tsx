@@ -37,6 +37,7 @@ import {
   AlertTriangle,
   FileText,
   MapPin,
+  Users,
 } from "lucide-react";
 import dynamic from "next/dynamic";
 import TimeAgo from "@/components/time-ago";
@@ -45,6 +46,7 @@ import { useState, useMemo, useEffect, useCallback } from "react";
 import { User as UserType } from "@/types";
 import { Skeleton } from "@/components/ui/skeleton";
 import { DashboardCard } from "@/components/dashboard-card";
+import { PageHeader } from "@/components/page-header";
 import { Input } from "@/components/ui/input";
 import { api, MonitoringUser } from "@/lib/api";
 import { Label } from "@/components/ui/label";
@@ -203,8 +205,12 @@ export default function UserMonitoringPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <h1 className="text-2xl font-bold tracking-tight uppercase font-mono">User Monitoring</h1>
+      <PageHeader
+        eyebrow="Collection"
+        icon={Users}
+        title="User Monitoring"
+        description="Public pages locked for monitoring. A district is assigned to each page by an officer, so every post and comment collected from it is attributed to a real area rather than guessed from the text."
+      >
         <div className="flex items-center gap-2">
           <div className="relative w-full md:w-64">
             <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
@@ -282,7 +288,7 @@ export default function UserMonitoringPage() {
             </DialogContent>
           </Dialog>
         </div>
-      </div>
+      </PageHeader>
 
       {apifyReady === false && (
         <div className="flex items-start gap-2 rounded-md border border-amber-500/40 bg-amber-500/5 p-3 text-xs">

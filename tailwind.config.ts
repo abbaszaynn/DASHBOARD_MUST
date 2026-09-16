@@ -15,9 +15,17 @@ export default {
     },
     extend: {
       fontFamily: {
-        body: ['Inter', 'sans-serif'],
-        headline: ['Inter', 'sans-serif'],
-        mono: ['JetBrains Mono', 'monospace'], // Updated for technical feel
+        // Noto Nastaliq Urdu sits after Inter in every stack: Latin resolves in
+        // Inter, and Arabic-script characters fall through to a real Urdu face
+        // instead of an arbitrary system fallback.
+        body: ['Inter', '"Noto Nastaliq Urdu"', 'sans-serif'],
+        headline: ['Inter', '"Noto Nastaliq Urdu"', 'sans-serif'],
+        // No Urdu fallback here on purpose: JetBrains Mono is not actually
+        // loaded, so anything listed after it catches all the Latin mono text
+        // (labels, timestamps, figures) - and Nastaliq has Latin glyphs, which
+        // turned the console labels proportional. Urdu uses .urdu-* instead.
+        mono: ['JetBrains Mono', 'monospace'],
+        urdu: ['"Noto Nastaliq Urdu"', '"Jameel Noori Nastaleeq"', 'serif'],
       },
       colors: {
         background: 'hsl(var(--background))',
@@ -93,10 +101,16 @@ export default {
             height: '0',
           },
         },
+        'border-beam': {
+          '100%': {
+            'offset-distance': '100%',
+          },
+        },
       },
       animation: {
         'accordion-down': 'accordion-down 0.2s ease-out',
         'accordion-up': 'accordion-up 0.2s ease-out',
+        'border-beam': 'border-beam calc(var(--duration)*1s) infinite linear',
       },
     },
   },

@@ -32,6 +32,7 @@ import { DateRange } from "react-day-picker";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
 import { DashboardCard } from "@/components/dashboard-card";
+import { PageHeader } from "@/components/page-header";
 import { Label } from "@/components/ui/label";
 
 import { api, FlaggedItem } from "@/lib/api";
@@ -65,15 +66,17 @@ export default function ReportsPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold tracking-tight uppercase font-mono">Reports & Audits</h1>
-        <div className="flex items-center gap-2">
-          <Button variant="outline" className="border-primary/20 hover:bg-primary/10 hover:text-primary">
-            <History className="mr-2 h-4 w-4" />
-            <span className="text-xs font-mono">ARCHIVE</span>
-          </Button>
-        </div>
-      </div>
+      <PageHeader
+        eyebrow="Governance"
+        icon={FileText}
+        title="Reports & Audits"
+        description="Exportable record of what was flagged, when, and on what basis — the paper trail behind any action the Department takes."
+      >
+        <Button variant="outline" className="border-primary/20 hover:bg-primary/10 hover:text-primary">
+          <History className="mr-2 h-4 w-4" />
+          <span className="text-xs font-mono">ARCHIVE</span>
+        </Button>
+      </PageHeader>
 
       <div className="space-y-6">
         <DashboardCard title="Report Generator" icon={FileOutput}>

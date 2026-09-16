@@ -199,8 +199,10 @@ function FlaggedContentView() {
                   onClick={() => handleRowClick(post)}
                 >
                   <TableCell className="font-medium">{post.user.name}</TableCell>
-                  <TableCell className="text-muted-foreground truncate max-w-xs">
-                    {post.content}
+                  <TableCell className="max-w-[360px]">
+                    <p className="truncate text-muted-foreground" title={post.content}>
+                      {post.content}
+                    </p>
                   </TableCell>
                   <TableCell>
                     <Badge

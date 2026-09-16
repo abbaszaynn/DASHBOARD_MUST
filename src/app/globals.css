@@ -3,122 +3,119 @@
 @tailwind utilities;
 
 @layer base {
+  /* Gunmetal command-console palette.
+     The chrome is deliberately achromatic: colour in this interface is reserved
+     for threat state (red = hate, amber = offensive, green = clear) so that a
+     coloured pixel on screen always means something. A tinted UI accent would
+     compete with those signals, which is why primary is platinum, not cyan. */
   :root {
-    /* Default to dark mode values for this specific theme */
-    --background: 222 47% 11%;
-    /* #0f172a - Slate 900 */
-    --foreground: 210 40% 98%;
-    /* Slate 50 */
+    --background: 220 7% 6%;
+    --foreground: 210 10% 96%;
 
-    --card: 217 33% 17%;
-    /* Slate 800 */
-    --card-foreground: 210 40% 98%;
+    --card: 220 7% 9%;
+    --card-foreground: 210 10% 96%;
 
-    --popover: 222 47% 11%;
-    --popover-foreground: 210 40% 98%;
+    --popover: 220 8% 7%;
+    --popover-foreground: 210 10% 96%;
 
-    --primary: 189 94% 43%;
-    /* Cyan 500 #06b6d4 */
-    --primary-foreground: 222 47% 11%;
+    --primary: 210 14% 86%;
+    /* Platinum - UI chrome, never a status colour */
+    --primary-foreground: 220 10% 7%;
 
-    --secondary: 217 33% 17%;
-    --secondary-foreground: 210 40% 98%;
+    --secondary: 220 6% 15%;
+    --secondary-foreground: 210 10% 96%;
 
-    --muted: 217 33% 17%;
-    --muted-foreground: 215 20% 65%;
+    --muted: 220 6% 14%;
+    --muted-foreground: 215 8% 62%;
 
-    --accent: 189 94% 43%;
-    --accent-foreground: 222 47% 11%;
+    --accent: 220 6% 18%;
+    --accent-foreground: 210 10% 96%;
 
-    --destructive: 0 84% 60%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive: 0 72% 52%;
+    --destructive-foreground: 210 10% 98%;
 
-    --border: 217 33% 17%;
-    --input: 217 33% 17%;
-    --ring: 189 94% 43%;
+    --border: 220 6% 17%;
+    --input: 220 6% 17%;
+    --ring: 210 14% 72%;
 
     --radius: 0.25rem;
     /* Sharper corners for technical feel */
 
-    --chart-1: 189 94% 43%;
-    /* Cyan */
-    --chart-2: 217 91% 60%;
-    /* Blue */
-    --chart-3: 271 70% 50%;
-    /* Purple */
-    --chart-4: 45 93% 47%;
-    /* Amber */
-    --chart-5: 0 84% 60%;
-    /* Red */
+    --chart-1: 210 14% 80%;
+    /* Platinum */
+    --chart-2: 202 16% 52%;
+    /* Steel */
+    --chart-3: 43 48% 55%;
+    /* Brass */
+    --chart-4: 32 88% 55%;
+    /* Amber - offensive */
+    --chart-5: 0 72% 55%;
+    /* Red - hate */
 
-    --sidebar-background: 222 47% 11%;
-    --sidebar-foreground: 210 40% 98%;
-    --sidebar-primary: 189 94% 43%;
-    --sidebar-primary-foreground: 222 47% 11%;
-    --sidebar-accent: 217 33% 17%;
-    --sidebar-accent-foreground: 210 40% 98%;
-    --sidebar-border: 217 33% 17%;
-    --sidebar-ring: 189 94% 43%;
+    --sidebar-background: 220 8% 5%;
+    --sidebar-foreground: 210 10% 92%;
+    --sidebar-primary: 210 14% 86%;
+    --sidebar-primary-foreground: 220 10% 7%;
+    --sidebar-accent: 220 6% 14%;
+    --sidebar-accent-foreground: 210 10% 96%;
+    --sidebar-border: 220 6% 15%;
+    --sidebar-ring: 210 14% 72%;
   }
 
   .dark {
-    --background: 222 47% 5%;
-    /* #020617 - Very dark blue/grey */
-    --foreground: 210 40% 98%;
-    /* #f8fafc */
+    --background: 220 8% 4%;
+    /* Near-black gunmetal, no blue cast */
+    --foreground: 210 10% 97%;
 
-    --card: 222 47% 8%;
-    /* #0f172a - Slightly lighter than bg */
-    --card-foreground: 210 40% 98%;
+    --card: 220 7% 8%;
+    --card-foreground: 210 10% 97%;
 
-    --popover: 222 47% 5%;
-    --popover-foreground: 210 40% 98%;
+    --popover: 220 8% 6%;
+    --popover-foreground: 210 10% 97%;
 
-    --primary: 189 94% 43%;
-    /* #06b6d4 - Cyan-500 (Security/Tech feel) */
-    --primary-foreground: 222 47% 5%;
+    --primary: 210 14% 88%;
+    /* Platinum - chrome only, so status colours stay unambiguous */
+    --primary-foreground: 220 10% 6%;
 
-    --secondary: 217 33% 17%;
-    /* #1e293b - Slate-800 */
-    --secondary-foreground: 210 40% 98%;
+    --secondary: 220 6% 14%;
+    --secondary-foreground: 210 10% 97%;
 
-    --muted: 217 33% 17%;
-    --muted-foreground: 215 20% 65%;
+    --muted: 220 6% 13%;
+    --muted-foreground: 215 8% 60%;
 
-    --accent: 189 94% 43%;
-    --accent-foreground: 222 47% 5%;
+    --accent: 220 6% 17%;
+    --accent-foreground: 210 10% 97%;
 
-    --destructive: 0 84% 60%;
-    /* #ef4444 - Red-500 */
-    --destructive-foreground: 210 40% 98%;
+    --destructive: 0 72% 52%;
+    --destructive-foreground: 210 10% 98%;
 
-    --border: 217 33% 17%;
-    --input: 217 33% 17%;
-    --ring: 189 94% 43%;
+    --border: 220 6% 16%;
+    --input: 220 6% 16%;
+    --ring: 210 14% 74%;
 
     --radius: 0.25rem;
     /* Sharp corners for technical look */
 
-    /* Chart Colors - Neon/Cyberpunk palette */
-    --chart-1: 189 94% 43%;
-    /* Cyan */
-    --chart-2: 280 65% 60%;
-    /* Purple */
-    --chart-3: 330 80% 60%;
-    /* Pink */
-    --chart-4: 45 90% 60%;
-    /* Yellow/Amber */
-    --chart-5: 0 84% 60%;
-    /* Red */
+    /* Instrument palette: achromatic for volume, hot colours for threat. */
+    --chart-1: 210 14% 82%;
+    /* Platinum */
+    --chart-2: 202 16% 50%;
+    /* Steel */
+    --chart-3: 43 48% 56%;
+    /* Brass */
+    --chart-4: 32 88% 56%;
+    /* Amber - offensive */
+    --chart-5: 0 72% 56%;
+    /* Red - hate */
 
-    --sidebar-background: 222 47% 4%;
-    --sidebar-foreground: 240 5% 96%;
-    --sidebar-primary: 189 94% 43%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 217 33% 17%;
-    --sidebar-accent-foreground: 240 5% 96%;
-    --sidebar-border: 217 33% 17%;
-    --sidebar-ring: 189 94% 43%;
+    --sidebar-background: 220 9% 3%;
+    --sidebar-foreground: 210 10% 93%;
+    --sidebar-primary: 210 14% 88%;
+    --sidebar-primary-foreground: 220 10% 6%;
+    --sidebar-accent: 220 6% 13%;
+    --sidebar-accent-foreground: 210 10% 97%;
+    --sidebar-border: 220 6% 14%;
+    --sidebar-ring: 210 14% 74%;
   }
 }
 
@@ -129,10 +126,11 @@
 
   body {
     @apply bg-background text-foreground;
-    /* Subtle grid pattern for technical feel */
-    background-image: linear-gradient(to right, #1e293b 1px, transparent 1px),
-      linear-gradient(to bottom, #1e293b 1px, transparent 1px);
-    background-size: 40px 40px;
+    /* Survey-grid backdrop. Neutral and near-invisible: it should read as the
+       texture of an instrument panel, not as a blue tint over the whole page. */
+    background-image: linear-gradient(to right, #15161a 1px, transparent 1px),
+      linear-gradient(to bottom, #15161a 1px, transparent 1px);
+    background-size: 48px 48px;
     background-position: center center;
     /* CRT Scanline Effect */
     position: relative;
@@ -142,6 +140,34 @@
   /* CRT scanline overlay removed — it forced GPU compositing on every
      frame via a position:fixed z-index:9999 pseudo-element, significantly
      hurting scroll and animation performance. */
+}
+
+/* Urdu / Arabic-script content.
+   Nastaliq glyphs are taller, more sloped and far more detailed than Latin, so
+   at the surrounding UI size they collapse into an unreadable smear. This gives
+   them a larger optical size and the loose leading the script needs, and
+   isolates the bidi run so an adjacent Latin author name is not reordered. */
+.urdu-text {
+  font-family: "Noto Nastaliq Urdu", "Jameel Noori Nastaleeq", "Noto Naskh Arabic", serif;
+  font-size: 1.25em;
+  line-height: 2.2;
+  direction: rtl;
+  unicode-bidi: isolate;
+}
+
+/* Denser contexts - table cells and feed rows - where a full 2.2 leading would
+   stretch every row. Still looser than Latin, because Nastaliq descenders clip
+   at normal line-height. */
+.urdu-inline {
+  font-family: "Noto Nastaliq Urdu", "Jameel Noori Nastaleeq", "Noto Naskh Arabic", serif;
+  font-size: 1.1em;
+  /* 2.3, not a tighter value: these cells also carry `truncate`, which sets
+     overflow:hidden, so a line box shorter than the glyphs shaves Nastaliq's
+     descenders rather than letting them spill. Measured at 1.95 the content
+     needed 34px in a 30px box. */
+  line-height: 2.3;
+  direction: rtl;
+  unicode-bidi: isolate;
 }
 
 /* Custom Scrollbar for Webkit */

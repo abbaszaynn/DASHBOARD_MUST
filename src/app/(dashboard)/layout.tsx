@@ -16,18 +16,49 @@ import {
   SidebarFooter,
 } from "@/components/ui/sidebar";
 
-import { Home, TrendingUp, Flag, Users, FileText, SettingsIcon, ShieldCheck, Activity, Lock, Gavel, Scale } from "lucide-react";
+import { Home, TrendingUp, Flag, Users, FileText, ShieldCheck, Activity, Lock, Gavel, Scale, Database, Drama, Network } from "lucide-react";
 import { UserNav } from "@/components/user-nav";
 import { cn } from "@/lib/utils";
 
-const navItems = [
-  { href: "/", icon: Home, label: "Command Center" },
-  { href: "/trend-analysis", icon: TrendingUp, label: "Trend Analysis" },
-  { href: "/flagged-content", icon: Flag, label: "Flagged Content" },
-  { href: "/review-queue", icon: Gavel, label: "Review Queue" },
-  { href: "/user-monitoring", icon: Users, label: "User Monitoring" },
-  { href: "/legal-framework", icon: Scale, label: "Legal Framework" },
-  { href: "/reports", icon: FileText, label: "Reports" },
+// Grouped by what an officer is doing, rather than one flat list: collection
+// (what we gathered), casework (what needs a decision), analysis (why the
+// pipeline concluded what it did), governance (the paper trail).
+const navSections = [
+  {
+    label: "Overview",
+    items: [
+      { href: "/", icon: Home, label: "Command Center" },
+      { href: "/trend-analysis", icon: TrendingUp, label: "Trend Analysis" },
+    ],
+  },
+  {
+    label: "Collection",
+    items: [
+      { href: "/apify-records", icon: Database, label: "Apify Records" },
+      { href: "/user-monitoring", icon: Users, label: "User Monitoring" },
+    ],
+  },
+  {
+    label: "Casework",
+    items: [
+      { href: "/review-queue", icon: Gavel, label: "Review Queue" },
+      { href: "/flagged-content", icon: Flag, label: "Flagged Content" },
+    ],
+  },
+  {
+    label: "Analysis",
+    items: [
+      { href: "/campaigns", icon: Network, label: "Campaign Clustering" },
+      { href: "/sarcasm", icon: Drama, label: "Sarcasm Signal" },
+    ],
+  },
+  {
+    label: "Governance",
+    items: [
+      { href: "/legal-framework", icon: Scale, label: "Legal Framework" },
+      { href: "/reports", icon: FileText, label: "Reports" },
+    ],
+  },
 ];
 
 export default function DashboardLayout({ children }: { children: ReactNode }) {
@@ -48,25 +79,32 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
           </div>
         </SidebarHeader>
         <SidebarContent>
-          <SidebarMenu className="px-2 py-4">
-            {navItems.map((item) => (
-              <SidebarMenuItem key={item.href} className="mb-1">
-                <Link href={item.href} passHref>
-                  <SidebarMenuButton
-                    tooltip={item.label}
-                    isActive={pathname === item.href}
-                    className={cn(
-                      "transition-all duration-200 hover:bg-primary/10 hover:text-primary data-[active=true]:bg-primary/15 data-[active=true]:text-primary data-[active=true]:shadow-[inset_3px_0_0_0_hsl(var(--primary))]",
-                      "h-10 text-sm font-medium tracking-wide"
-                    )}
-                  >
-                    <item.icon className="h-4 w-4" />
-                    <span>{item.label}</span>
-                  </SidebarMenuButton>
-                </Link>
-              </SidebarMenuItem>
-            ))}
-          </SidebarMenu>
+          {navSections.map((section) => (
+            <div key={section.label} className="px-2 pt-3">
+              <p className="px-2 pb-1 font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground/70 group-data-[collapsible=icon]:hidden">
+                {section.label}
+              </p>
+              <SidebarMenu>
+                {section.items.map((item) => (
+                  <SidebarMenuItem key={item.href} className="mb-0.5">
+                    <Link href={item.href} passHref>
+                      <SidebarMenuButton
+                        tooltip={item.label}
+                        isActive={pathname === item.href}
+                        className={cn(
+                          "transition-all duration-200 hover:bg-primary/10 hover:text-primary data-[active=true]:bg-primary/15 data-[active=true]:text-primary data-[active=true]:shadow-[inset_3px_0_0_0_hsl(var(--primary))]",
+                          "h-9 text-sm font-medium tracking-wide"
+                        )}
+                      >
+                        <item.icon className="h-4 w-4" />
+                        <span>{item.label}</span>
+                      </SidebarMenuButton>
+                    </Link>
+                  </SidebarMenuItem>
+                ))}
+              </SidebarMenu>
+            </div>
+          ))}
         </SidebarContent>
         <SidebarFooter className="border-t border-border/40 p-4">
           <div className="rounded-md bg-card/50 p-3 border border-border/50">
@@ -91,7 +129,7 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
           </Link>
         </SidebarFooter>
       </Sidebar>
-      <SidebarInset className="bg-background/50">
+      <SidebarInset className="min-w-0 bg-background/50">
         <header className="sticky top-0 z-10 flex h-14 items-center justify-between border-b border-border/40 bg-background/80 px-6 backdrop-blur supports-[backdrop-filter]:bg-background/60">
           <div className="flex items-center gap-4">
             <SidebarTrigger />
@@ -107,10 +145,11 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
             <UserNav />
           </div>
         </header>
-        <main className="flex-1 p-6 overflow-hidden">
-          <div className="mx-auto max-w-7xl animate-in fade-in duration-300">
-            {children}
-          </div>
+        {/* No overflow-hidden here: it clipped wide tables instead of letting
+            them scroll, which is what made content look cut off. min-w-0 lets
+            this column shrink below its content so inner scroll areas work. */}
+        <main className="min-w-0 flex-1 p-4 md:p-6">
+          <div className="mx-auto w-full min-w-0 max-w-[1600px]">{children}</div>
         </main>
       </SidebarInset>
     </SidebarProvider>

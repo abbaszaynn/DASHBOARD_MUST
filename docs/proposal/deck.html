@@ -214,18 +214,51 @@ ul.clean li strong{display:block;color:var(--ink);font-weight:600;margin-bottom:
 a{color:var(--brand)}
 :focus-visible{outline:2px solid var(--accent);outline-offset:3px}
 
+/* PDF export: one slide per page, at the deck's own widescreen ratio, in full
+   colour - not the black-on-white "save ink" style browsers default to. */
+@page{size:13.333in 7.5in;margin:0}
 @media print{
-  .classbar,.pager,.progress{position:static}
+  *{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important;color-adjust:exact!important}
+  :root{
+    --ground:#F5F5F2; --surface:#FFFFFF; --surface-2:#ECECE6;
+    --ink:#14181D; --ink-2:#4A525C; --ink-3:#818A94;
+    --rule:#D8D8D0; --rule-strong:#B9B9AF;
+    --brand:#24384F; --brand-soft:#E3E9EF;
+    --accent:#8C6A2B; --accent-soft:#F1E8D7;
+    --critical:#9B3226; --caution:#A8762A; --ok:#3A6551;
+    --stamp:#9B3226;
+  }
+  body{background:var(--ground)!important;color:var(--ink)!important}
+  .pager,.progress,.classbar{display:none}
+  /* Headless Chrome's print-to-pdf pipeline does not evaluate min-width media
+     queries against the actual @page width, so the responsive multi-column
+     grids below silently collapse to one column in print. The print page is
+     always wide enough for the design's intended layout, so force it directly
+     instead of relying on a query print doesn't honour. */
+  .g2{grid-template-columns:1fr 1fr!important}
+  .g3{grid-template-columns:repeat(3,1fr)!important}
+  .figs{grid-template-columns:repeat(3,1fr)!important}
+  .pipe{flex-wrap:nowrap!important}
+  .arrow{transform:none!important}
   .deck{height:auto;overflow:visible}
-  .slide{min-height:auto;page-break-after:always;border:0;padding:1.5rem 0}
-  body{background:#fff;color:#000}
+  .slide{
+    /* min-height, not height: a fixed height on a box whose content runs
+       longer causes the overflow to paint into the following page's area
+       instead of fragmenting cleanly - a dense slide should grow past one
+       page, not bleed into the next slide's. */
+    width:13.333in; min-height:7.5in;
+    box-sizing:border-box; border:0; page-break-after:always; break-after:page;
+    padding:clamp(2.5rem,5vw,5rem) clamp(1.5rem,6vw,6rem) clamp(4.5rem,7vw,6rem);
+  }
+  .slide:last-child{page-break-after:auto;break-after:auto}
+  .tw,.card,tr,.callout,.pipe,.figs,.sig{page-break-inside:avoid;break-inside:avoid}
 }
 </style>
 
 <div class="progress" id="prog"></div>
 <div class="classbar">
   <b>Restricted &mdash; For Official Use Only</b>
-  <span>Ref [REF/GB-HPD/2026/___]</span>
+  <span>Ref: NA</span>
 </div>
 
 <div class="deck" id="deck">
@@ -239,9 +272,11 @@ a{color:var(--brand)}
       <p class="lead">A decision-support system for Gilgit-Baltistan that identifies potentially unlawful online content, maps it to the applicable law, and places every case before a human officer.</p>
       <dl class="cover-meta">
         <div><dt>Submitted to</dt><dd>The Home Secretary<br>Home &amp; Prison Department<br>Government of Gilgit-Baltistan</dd></div>
-        <div><dt>Submitted by</dt><dd>[ORGANISATION NAME]<br>[Designation, Contact]</dd></div>
-        <div><dt>Year 1 programme</dt><dd class="mono" style="color:var(--accent)">PKR 29,894,666</dd></div>
-        <div><dt>Date</dt><dd class="mono">30 August 2026</dd></div>
+        <div><dt>Submitted by</dt><dd>Zain Abbas<br><span style="color:var(--ink-3);font-size:.85em">Zircon Logics</span></dd></div>
+        <div><dt>Contact</dt><dd style="font-size:.85em">abbaszayn08@gmail.com<br>0316&#8209;9244827 &middot; 0355&#8209;5653738</dd></div>
+        <div><dt>Date</dt><dd class="mono">16 Sep 2026</dd></div>
+        <div><dt>Reference</dt><dd class="mono">NA</dd></div>
+        <div><dt>Year 1 program</dt><dd class="mono" style="color:var(--accent)">PKR 29,894,666</dd></div>
       </dl>
     </div>
   </section>
@@ -414,7 +449,7 @@ a{color:var(--brand)}
       <div class="figs" style="margin-top:1.8rem">
         <div class="fig"><span class="v">6.93M</span><span class="k">PKR &mdash; within the Year 1 total</span><span class="sub">&asymp; USD 24,755</span></div>
         <div class="fig"><span class="v">3</span><span class="k">Months to a measured result</span><span class="sub">Gilgit &amp; Skardu</span></div>
-        <div class="fig"><span class="v">23%</span><span class="k">Of the Year 1 programme</span><span class="sub">Review point at Month 4</span></div>
+        <div class="fig"><span class="v">23%</span><span class="k">Of the Year 1 program</span><span class="sub">Review point at Month 4</span></div>
       </div>
     </div>
   </section>
@@ -423,7 +458,7 @@ a{color:var(--brand)}
   <section class="slide">
     <div class="inner">
       <p class="eyebrow">08 &mdash; Cost Plan B</p>
-      <h2>Year 1 Complete Programme</h2>
+      <h2>Year 1 Complete Program</h2>
       <div class="tw" style="margin-top:1.2rem">
         <table>
           <thead><tr><th>Cost head</th><th class="num">PKR</th></tr></thead>
@@ -538,7 +573,7 @@ a{color:var(--brand)}
     <div class="inner">
       <p class="eyebrow">12 &mdash; Recommendation</p>
       <h2>Approve PKR 29,894,666</h2>
-      <p class="lead">The Year 1 Complete Programme &mdash; all development, hardware and twelve months of subscription charges, within the ceiling already approved by the Home Secretary.</p>
+      <p class="lead">The Year 1 Complete Program &mdash; all development, hardware and twelve months of subscription charges, within the ceiling already approved by the Home Secretary.</p>
       <hr class="rule">
       <div class="grid g3">
         <div><h3>Costed to the envelope, honestly</h3><p style="font-size:.9rem">Scope was reduced in infrastructure resilience, assurance depth and capacity &mdash; and stated plainly, so nothing fails by surprise during delivery.</p></div>
@@ -546,7 +581,9 @@ a{color:var(--brand)}
         <div><h3>A review point at Month 4</h3><p style="font-size:.9rem">Stage 1 delivers measured accuracy on GB content before the greater part of the expenditure is committed &mdash; with a documented basis to continue, adjust or halt.</p></div>
       </div>
       <div class="sig">
-        <div><span>Signature &mdash; [ORGANISATION NAME]</span></div>
+        <div><span>Signature</span>
+          <p style="margin-top:.6rem;font-size:.85rem;color:var(--ink)">Zain Abbas<br><span style="color:var(--ink-3)">Technical Lead, Zircon Logics</span></p>
+        </div>
         <div><span>Date</span></div>
       </div>
     </div>

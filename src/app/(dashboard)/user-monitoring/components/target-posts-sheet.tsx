@@ -13,6 +13,7 @@ import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ExternalLink, MapPin, History, FileText, Gavel, MessageSquare } from "lucide-react";
 import TimeAgo from "@/components/time-ago";
+import { isArabicScript } from "@/lib/utils";
 import { api, MonitoringUser, ScrapeRun, TargetPost } from "@/lib/api";
 
 const categoryClass = (c: string | null) =>
@@ -64,7 +65,7 @@ function CommentRow({ c }: { c: TargetPost }) {
     <li className={`rounded border p-2 space-y-1.5 ${isFlagged(c) ? "border-destructive/40 bg-destructive/5" : "bg-background/40"}`}>
       <p className="text-xs">
         <span className="font-medium">{c.author || "Facebook user"}</span>{" "}
-        <span className="text-foreground/90">{c.text}</span>
+        <span className={`text-foreground/90 ${isArabicScript(c.text) ? "urdu-text" : ""}`}>{c.text}</span>
       </p>
       <ItemMeta p={c} />
     </li>
@@ -185,7 +186,9 @@ export default function TargetPostsSheet({ target, isOpen, onOpenChange }: Props
                   const flaggedHere = comments.filter(isFlagged).length;
                   return (
                     <li key={p.id} className={`rounded-md border p-3 space-y-2 ${isFlagged(p) ? "border-destructive/40" : "bg-card/50"}`}>
-                      <p className="text-sm leading-snug">{p.text}</p>
+                      <p className={`text-sm leading-snug ${isArabicScript(p.text) ? "urdu-text" : ""}`}>
+                        {p.text}
+                      </p>
                       <ItemMeta p={p} />
                       {comments.length > 0 && (
                         <div className="pt-2 border-t border-border/40">

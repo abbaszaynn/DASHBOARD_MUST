@@ -13,9 +13,10 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { PageHeader } from "@/components/page-header";
-import { ShieldAlert, Scale, Users, RefreshCw, Download, Loader2 } from "lucide-react";
+import { ShieldAlert, Scale, Users, RefreshCw, Download, Loader2, Gavel } from "lucide-react";
 import { format } from "date-fns";
 import { api, ReviewQueueItem } from "@/lib/api";
+import { isArabicScript } from "@/lib/utils";
 import ReviewQueueDetailsSheet from "./components/review-queue-details-sheet";
 
 const categoryBadgeVariant = (category: string) => {
@@ -97,6 +98,8 @@ export default function ReviewQueuePage() {
   return (
     <>
       <PageHeader
+        eyebrow="Casework"
+        icon={Gavel}
         title="Review Queue"
         description="Every flagged case lands here for human review before any action is taken — the pipeline never acts on its own."
       >
@@ -173,7 +176,18 @@ export default function ReviewQueuePage() {
                         {item.priority.toUpperCase()}
                       </Badge>
                     </TableCell>
-                    <TableCell className="text-muted-foreground truncate max-w-xs">{item.text}</TableCell>
+                    {/* truncate needs a block child inside a table cell - on the
+                        <td> itself it is ignored and the text overflows instead. */}
+                    <TableCell className="max-w-[360px]">
+                      <p
+                        className={`truncate text-muted-foreground ${
+                          isArabicScript(item.text) ? "urdu-inline" : ""
+                        }`}
+                        title={item.text}
+                      >
+                        {item.text}
+                      </p>
+                    </TableCell>
                     <TableCell>
                       <Badge variant={categoryBadgeVariant(item.category)}>{item.category}</Badge>
                     </TableCell>

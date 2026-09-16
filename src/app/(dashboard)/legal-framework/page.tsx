@@ -26,6 +26,8 @@ export default function LegalFrameworkPage() {
   return (
     <div className="space-y-6">
       <PageHeader
+        eyebrow="Governance"
+        icon={Scale}
         title="Legal Framework"
         description="The reference table the Legal Mapping Agent matches flagged content against."
       />
